@@ -8,8 +8,8 @@ import json, re, shutil, sys, html
 from pathlib import Path
 
 ROOT = Path(__file__).parent
-SRC, OUT = ROOT / 'src', ROOT / 'site'
 PROD = '--prod' in sys.argv
+SRC, OUT = ROOT / 'src', ROOT / ('site-prod' if PROD else 'site')  # prod vai para pasta separada; a prévia não é sobrescrita
 CANON = 'https://splacademy.com.br/'
 VERSION = '1.0.0'
 PREVIEW_BASE = '/splacademy-site/'  # caminho no github.io (prévia)
@@ -98,6 +98,14 @@ def layout(t, meta, body, slug, lang_codes, url_path, root):
     foot_links = ''.join(f'<li><a href="{root}{s}/">{l}</a></li>' for s, l in t['nav'])
     preview_note = '' if PROD else f'<span>{t["foot_preview"]} v{VERSION}.</span>'
     ogimg = CANON + 'assets/img/og.png'
+    jsonld = '<script type="application/ld+json">' + json.dumps({
+        '@context': 'https://schema.org', '@type': ['EducationalOrganization', 'LocalBusiness'],
+        'name': 'SPLA · São Paulo Languages Academy', 'url': CANON, 'logo': CANON + 'assets/img/icon-512.png', 'image': ogimg,
+        'email': EMAIL, 'telephone': '+55 11 98178-3554',
+        'address': {'@type': 'PostalAddress', 'streetAddress': 'Av. Paulista, 1106, Sala 01, Andar 16', 'addressLocality': 'São Paulo',
+                    'addressRegion': 'SP', 'postalCode': '01310-914', 'addressCountry': 'BR'},
+        'parentOrganization': {'@type': 'Organization', 'name': 'SIIN ANALYTICS SISTEMAS INFORMATICOS LTDA', 'url': 'https://siincompany.com', 'taxID': '54.575.722/0001-01'},
+        'areaServed': 'BR', 'inLanguage': ['pt-BR', 'en']}, ensure_ascii=False) + '</script>'
     return f'''<!doctype html>
 <html lang="{t["lang"]}" data-root="{root}">
 <head>
@@ -126,6 +134,10 @@ def layout(t, meta, body, slug, lang_codes, url_path, root):
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="SPLA · Sophia, a tutora de IA em 3D, numa chamada de voz">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{html.escape(title)}">
+<meta name="twitter:description" content="{html.escape(desc)}">
+<meta name="twitter:image" content="{ogimg}">
+{jsonld if slug == 'home' else ''}
 {head_extra}
 </head>
 <body>
@@ -133,7 +145,7 @@ def layout(t, meta, body, slug, lang_codes, url_path, root):
 <div class="progress" aria-hidden="true"><i></i></div>
 <header class="top">
   <div class="wrap top__in">
-    <a class="logo" href="{root}{t["prefix"]}" aria-label="{t["home_label"]}">{MARK}<span class="logo__t"><b>São Paulo</b><span>Languages Academy</span></span></a>
+    <a class="logo" href="{root}{t["prefix"]}">{MARK}<span class="logo__t"><b>São Paulo</b> <span>Languages Academy</span></span></a>
     {f'<nav class="nav" aria-label="Principal"><ul>{nav}</ul></nav>' if nav else ''}
     <div class="top__end">{lang_sw}{cta_top}
     {f'<button class="burger" type="button" aria-controls="drawer" aria-expanded="false" aria-label="{t["menu"]}">{ICON["menu"]}</button>' if nav else ''}</div>
@@ -148,7 +160,7 @@ def layout(t, meta, body, slug, lang_codes, url_path, root):
   <div class="wrap">
     <p class="foot__big" aria-hidden="true" data-foot-big>São Paulo · Tamo junto ·</p>
     <div class="foot__grid">
-      <div><a class="logo" href="{root}{t["prefix"]}" aria-label="{t["home_label"]}">{MARK}<span class="logo__t"><b>São Paulo</b><span>Languages Academy</span></span></a><p>{t["foot_about"]}</p></div>
+      <div><a class="logo" href="{root}{t["prefix"]}">{MARK}<span class="logo__t"><b>São Paulo</b> <span>Languages Academy</span></span></a><p>{t["foot_about"]}</p></div>
       <div><h2>{t["foot_site"]}</h2><ul>{foot_links or f'<li><a href="{root}">Português</a></li>'}</ul></div>
       <div><h2>{t["foot_more"]}</h2><ul><li><a href="{root}contato/#faq">{t["foot_faq"]}</a></li>{'<li><a href="#sophia" data-open-sophia>'+t["foot_sophia"]+'</a></li>' if is_pt else ''}<li><a href="{root}privacidade/">{t["foot_privacy"]}</a></li></ul></div>
       <div><h2>{t["foot_talk"]}</h2><ul><li><a href="mailto:{EMAIL}">{EMAIL}</a></li><li><a href="{wa_top}" target="_blank" rel="noopener">{t["wa_label"]} +55 11 9 8178-3554</a></li><li><span>São Paulo, SP</span></li></ul></div>

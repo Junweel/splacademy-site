@@ -726,3 +726,4 @@ tr:last-child td,tr:last-child th{border-bottom:0}
 .constel.is-live .constel__nodes li.is-off{display:none}
 @media (max-width:600px){.constel.is-live{height:520px}.constel.is-live .constel__core{width:104px;height:104px}.constel__core b{font-size:2.2rem}.constel.is-live .constel__nodes li{font-size:.62rem;padding:5px 8px}}
 @media (max-width:600px){.cast figcaption{white-space:nowrap;font-size:.56rem;letter-spacing:.06em}}
+.legal{max-width:760px}.legal h2{font-size:clamp(1.3rem,2.4vw,1.7rem);margin:2em 0 .6em}.legal h2:first-child{margin-top:0}.legal ul{padding-left:1.2em}.legal li{margin:.45em 0}.legal p,.legal li{line-height:1.65}
