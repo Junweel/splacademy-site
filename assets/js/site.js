@@ -1,26 +1,98 @@
-/* SPLA · site v0 · JS puro, sem dependências. */
+/* SPLA · site v1 · JS próprio + GSAP/ScrollTrigger/Lenis carregados sob demanda (só quando há movimento permitido). */
 (() => {
 'use strict';
 const d = document, root = d.documentElement;
 root.classList.add('js');
 const RM = matchMedia('(prefers-reduced-motion: reduce)');
 const reduced = () => RM.matches;
+const FINE = matchMedia('(hover: hover) and (pointer: fine)').matches;
+const SAVE = !!(navigator.connection && navigator.connection.saveData);
 const BASE = root.dataset.root || './';
 const T = window.SPLA_I18N || {};
 const $ = (s, el = d) => el.querySelector(s), $$ = (s, el = d) => [...el.querySelectorAll(s)];
 const wait = ms => new Promise(r => setTimeout(r, ms));
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const idle = fn => ('requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 2500 }) : setTimeout(fn, 900));
+const onView = (el, cb, opts = {}) => {
+  if (!('IntersectionObserver' in window)) { cb(true); return; }
+  const io = new IntersectionObserver(es => es.forEach(e => { cb(e.isIntersecting, e); if (e.isIntersecting && opts.once) io.disconnect(); }), { rootMargin: opts.margin || '0px', threshold: opts.threshold || 0 });
+  io.observe(el); return io;
+};
+const ICON_PAUSE = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 4h3v12H5zM12 4h3v12h-3z" fill="currentColor"/></svg>';
+const ICON_PLAY = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4l10 6-10 6z" fill="currentColor"/></svg>';
+const MEDIA = BASE + 'assets/media/';
+const VEXT = (() => { const v = d.createElement('video'); return v.canPlayType('video/webm; codecs="vp9"') ? '.webm' : (v.canPlayType('video/mp4') ? '.mp4' : ''); })();
+const canVideo = () => !!VEXT && !reduced() && !SAVE;
 
-/* ---------- header ---------- */
-const top = $('.top');
-const onScroll = () => top && top.classList.toggle('is-scrolled', scrollY > 8);
-addEventListener('scroll', onScroll, { passive: true }); onScroll();
+/* ---------- ponteiro global ---------- */
+const P = { x: innerWidth / 2, y: innerHeight / 3, t: 0, fine: FINE };
+addEventListener('pointermove', e => { P.x = e.clientX; P.y = e.clientY; P.t = performance.now(); }, { passive: true });
+
+/* ---------- header, progresso, rolagem ---------- */
+const top = $('.top'), prog = $('.progress i');
+let lastY = scrollY, vel = 0, ticking = false;
+function onScroll() {
+  if (ticking) return; ticking = true;
+  requestAnimationFrame(() => {
+    ticking = false;
+    const y = scrollY, max = (d.scrollingElement || root).scrollHeight - innerHeight;
+    vel = y - lastY;
+    if (top) {
+      top.classList.toggle('is-scrolled', y > 8);
+      const open = d.body.classList.contains('drawer-open') || top.contains(d.activeElement);
+      if (!open && vel > 6 && y > 520) top.classList.add('is-hidden');
+      else if (vel < -6 || y < 200 || open) top.classList.remove('is-hidden');
+    }
+    if (prog) prog.style.setProperty('--p', max > 0 ? (y / max).toFixed(4) : 0);
+    lastY = y;
+    pinned.forEach(f => f());
+  });
+}
+const pinned = [];
+addEventListener('scroll', onScroll, { passive: true });
+
+/* ---------- menu ---------- */
 const burger = $('.burger'), drawer = $('#drawer');
+let lenis = null;
 if (burger && drawer) {
-  const set = open => { burger.setAttribute('aria-expanded', open); drawer.classList.toggle('is-open', open); d.body.style.overflow = open ? 'hidden' : ''; if (open) $('a', drawer)?.focus(); };
+  const set = open => {
+    burger.setAttribute('aria-expanded', open); drawer.classList.toggle('is-open', open);
+    d.body.style.overflow = open ? 'hidden' : ''; d.body.classList.toggle('drawer-open', open);
+    if (lenis) open ? lenis.stop() : lenis.start();
+    if (open) { top?.classList.remove('is-hidden'); $('a', drawer)?.focus(); }
+  };
   burger.addEventListener('click', () => set(burger.getAttribute('aria-expanded') !== 'true'));
   d.addEventListener('keydown', e => { if (e.key === 'Escape' && drawer.classList.contains('is-open')) { set(false); burger.focus(); } });
   matchMedia('(min-width:1080px)').addEventListener('change', e => e.matches && set(false));
 }
+
+/* ---------- títulos cinéticos: palavra por palavra ---------- */
+function splitWords(el) {
+  let i = 0;
+  const walk = node => {
+    [...node.childNodes].forEach(n => {
+      if (n.nodeType === 3) {
+        const parts = n.textContent.split(/(\s+)/); const frag = d.createDocumentFragment();
+        parts.forEach(p => {
+          if (!p) return;
+          if (/^\s+$/.test(p)) { frag.appendChild(d.createTextNode(' ')); return; }
+          const kw = d.createElement('span'); kw.className = 'kw';
+          const s = d.createElement('span'); s.style.setProperty('--i', i++); s.textContent = p;
+          kw.appendChild(s); frag.appendChild(kw);
+        });
+        n.replaceWith(frag);
+      } else if (n.nodeType === 1 && !n.classList.contains('kw')) walk(n);
+    });
+  };
+  walk(el);
+}
+$$('[data-kinetic]').forEach(h => {
+  if (!h.getAttribute('aria-label')) h.setAttribute('aria-label', h.textContent.replace(/\s+/g, ' ').trim());
+  splitWords(h); $$('.kw', h).forEach(k => k.setAttribute('aria-hidden', 'true'));
+  if (reduced()) { h.classList.add('is-in'); return; }
+  onView(h, v => v && h.classList.add('is-in'), { once: true, margin: '0px 0px -10% 0px' });
+});
 
 /* ---------- revelar ao rolar ---------- */
 if ('IntersectionObserver' in window && !reduced()) {
@@ -28,172 +100,431 @@ if ('IntersectionObserver' in window && !reduced()) {
   $$('.reveal').forEach(el => io.observe(el));
 } else $$('.reveal').forEach(el => el.classList.add('in'));
 
-/* ---------- piso que reage ao ponteiro ---------- */
-$$('.hero').forEach(h => {
+/* ---------- holofote do piso (hero/cta) ---------- */
+$$('[data-spot]').forEach(h => {
   let raf = 0;
   h.addEventListener('pointermove', e => {
-    if (reduced() || e.pointerType === 'touch') return;
+    if (reduced()) return;
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(() => { const r = h.getBoundingClientRect(); h.style.setProperty('--mx', (e.clientX - r.left) + 'px'); h.style.setProperty('--my', (e.clientY - r.top) + 'px'); });
   });
 });
+$$('[data-glow]').forEach(s => {
+  const g = $('.glow', s); if (!g) return;
+  s.addEventListener('pointermove', e => { if (reduced()) return; const r = s.getBoundingClientRect(); g.style.setProperty('--gx', (e.clientX - r.left) + 'px'); g.style.setProperty('--gy', (e.clientY - r.top) + 'px'); });
+});
 
-/* ---------- rig dos personagens (olhos, piscar, boca) ---------- */
-const SKIN = { sophia: '#C46203', erick: '#C06006', lili: '#D98020' };
-const LABEL = T.rigLabel || { sophia: 'Ilustração da Sophia', erick: 'Ilustração do Erick', lili: 'Ilustração da Teacher Lili' };
-const svgCache = {};
-const pointer = { x: innerWidth / 2, y: innerHeight / 3, t: 0 };
-addEventListener('pointermove', e => { pointer.x = e.clientX; pointer.y = e.clientY; pointer.t = performance.now(); }, { passive: true });
-const rigs = [];
-let uid = 0;
-
-async function mountRig(host) {
-  const name = host.dataset.rig; if (!name) return null;
-  try {
-    svgCache[name] = svgCache[name] || fetch(BASE + 'assets/svg/' + name + '.svg').then(r => { if (!r.ok) throw new Error(r.status); return r.text(); });
-    let txt = await svgCache[name];
-    const p = 'r' + (++uid) + '-';
-    txt = txt.replace(/\sid="([^"]+)"/g, ` id="${p}$1"`).replace(/url\(#([^)]+)\)/g, `url(#${p}$1)`).replace(/href="#([^"]+)"/g, `href="#${p}$1"`);
-    const wrap = d.createElement('div'); wrap.innerHTML = txt;
-    const svg = wrap.firstElementChild;
-    svg.classList.add('rig'); svg.removeAttribute('width'); svg.removeAttribute('height');
-    svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', host.dataset.label || LABEL[name] || name);
-    $$('[aria-label]', svg).forEach(el => el !== svg && el.removeAttribute('aria-label'));
-    $$('title,desc', svg).forEach(el => el.remove());
-    const g = id => svg.querySelector('#' + CSS.escape(p + id));
-    g('background')?.remove();
-    const NS = 'http://www.w3.org/2000/svg';
-    // swap image fallback for live svg
-    const img = $('img', host);
-    host.appendChild(svg); if (img) img.remove();
-    // mouths
-    const MV = g('mouth_variants'); MV?.removeAttribute('display');
-    const mouths = {};
-    ['sil','MBP','AA','EE','OO','UU','FV','L_TH_D','smile_closed','smile_open','surprise_o'].forEach(k => { const m = g('variant_' + k); if (m) { mouths[k] = m; m.setAttribute('display', 'none'); } });
-    g('mouth')?.setAttribute('display', 'none');
-    let cur = 'sil'; mouths.sil?.setAttribute('display', 'inline');
-    const rest = host.dataset.rest && mouths[host.dataset.rest] ? host.dataset.rest : 'sil';
-    const setMouth = k => { if (!mouths[k]) k = 'sil'; if (k === cur) return; mouths[cur]?.setAttribute('display', 'none'); mouths[k].setAttribute('display', 'inline'); cur = k; };
-    setMouth(rest);
-    // lids
-    const lids = [];
-    ['L', 'R'].forEach(s => {
-      const w = g('eye_white_' + s), clip = g('eye_clip_' + s); if (!w || !clip) return;
-      const bb = w.getBBox(); const x = bb.x - 3, y = bb.y - 3, W = bb.width + 6, H = bb.height + 6;
-      const grp = d.createElementNS(NS, 'g'); grp.setAttribute('clip-path', `url(#${p}eye_clip_${s})`);
-      const r = d.createElementNS(NS, 'rect'); Object.entries({ x, y, width: W, height: H, fill: SKIN[name] || '#C46203' }).forEach(([k, v]) => r.setAttribute(k, v));
-      r.setAttribute('transform', `translate(0 ${y}) scale(1 0) translate(0 ${-y})`);
-      grp.appendChild(r);
-      const lu = g('lid_upper_' + s), hostEye = g('eye_' + s) || w.parentNode;
-      if (lu && lu.parentNode === hostEye) hostEye.insertBefore(grp, lu); else hostEye.appendChild(grp);
-      lids.push({ r, y, H, lu });
-    });
-    const setLid = v => lids.forEach(l => { l.r.setAttribute('transform', `translate(0 ${l.y}) scale(1 ${v}) translate(0 ${-l.y})`); l.lu?.setAttribute('transform', `translate(0 ${(l.H - 6) * .78 * v})`); });
-    // pupils: wrap children so the clip-path stays put
-    const pupils = ['iris_L', 'pupil_L', 'iris_R', 'pupil_R'].map(g).filter(Boolean).map(el => {
-      const inner = d.createElementNS(NS, 'g'); while (el.firstChild) inner.appendChild(el.firstChild); el.appendChild(inner); return inner;
-    });
-    const brows = ['brow_L', 'brow_R'].map(g).filter(Boolean);
-    const rig = { name, host, svg, setMouth, mouths, rest, gaze: { x: 0, y: 0 }, tgt: { x: 0, y: 0 }, lid: 0, blinkAt: performance.now() + 1200 + Math.random() * 2500, speaking: false, happy: false };
-    rig.setGaze = (x, y) => { pupils.forEach(el => el.setAttribute('transform', `translate(${x.toFixed(2)} ${y.toFixed(2)})`)); };
-    rig.setBrow = v => brows.forEach(b => b.setAttribute('transform', `translate(0 ${-v})`));
-    rig.setLid = setLid;
-    rig.blink = async () => { if (reduced()) return; for (const v of [.5, 1, 1, .6, .2, 0]) { setLid(v); await wait(32); } };
-    // hover reaction: smile + brows
-    const card = host.closest('[data-hover]') || host;
-    card.addEventListener('pointerenter', () => { rig.happy = true; if (!rig.speaking) setMouth(mouths.smile_open ? 'smile_open' : 'smile_closed'); rig.setBrow(2.2); });
-    card.addEventListener('pointerleave', () => { rig.happy = false; if (!rig.speaking) setMouth(rig.rest); rig.setBrow(0); });
-    rig.say = (text, msPerChar = 55) => speak(rig, text, msPerChar);
-    rigs.push(rig);
-    host.classList.add('is-live');
-    return rig;
-  } catch (err) { console.warn('rig', name, err); return null; }
+/* ---------- cursor próprio ---------- */
+if (FINE && !reduced()) {
+  const c = d.createElement('div'); c.className = 'cursor'; c.setAttribute('aria-hidden', 'true'); c.innerHTML = '<span></span>';
+  const dot = d.createElement('div'); dot.className = 'cursor-dot'; dot.setAttribute('aria-hidden', 'true');
+  d.body.append(c, dot);
+  const lab = $('span', c);
+  let cx = P.x, cy = P.y, shown = false;
+  const loop = () => {
+    cx = lerp(cx, P.x, .2); cy = lerp(cy, P.y, .2);
+    c.style.transform = `translate3d(${cx}px,${cy}px,0)`; dot.style.transform = `translate3d(${P.x}px,${P.y}px,0)`;
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+  d.addEventListener('pointermove', e => {
+    if (e.pointerType !== 'mouse') return;
+    if (!shown) { shown = true; root.classList.add('has-cursor'); }
+    const t = e.target.closest ? e.target : null; if (!t) return;
+    const labelEl = t.closest('[data-cursor-label]');
+    const field = t.closest('input,textarea,select,.sp,iframe');
+    c.classList.toggle('is-hidden', !!field); dot.classList.toggle('is-hidden', !!field);
+    if (labelEl) { c.classList.add('is-label'); c.classList.remove('is-link'); lab.textContent = labelEl.dataset.cursorLabel; }
+    else { c.classList.remove('is-label'); c.classList.toggle('is-link', !!t.closest('a,button,label,[role="button"],summary')); }
+  }, { passive: true });
+  d.addEventListener('pointerdown', () => c.classList.add('is-down'));
+  d.addEventListener('pointerup', () => c.classList.remove('is-down'));
+  d.documentElement.addEventListener('pointerleave', () => root.classList.remove('has-cursor'));
+  d.documentElement.addEventListener('pointerenter', () => shown && root.classList.add('has-cursor'));
 }
 
-const VIS = ch => {
-  ch = ch.toLowerCase();
-  if ('aáàâã'.includes(ch)) return 'AA';
-  if ('eéêiíy'.includes(ch)) return 'EE';
-  if ('oóôõ'.includes(ch)) return 'OO';
-  if ('uúw'.includes(ch)) return 'UU';
-  if ('mbp'.includes(ch)) return 'MBP';
-  if ('fv'.includes(ch)) return 'FV';
-  if ('ltdnrszcç'.includes(ch)) return 'L_TH_D';
-  if (/[a-z]/.test(ch)) return 'EE';
-  return 'sil';
-};
-async function speak(rig, text, ms) {
-  if (!rig || reduced()) return;
-  rig.speaking = true; const token = rig.token = {};
-  for (const ch of text) { if (rig.token !== token) return; rig.setMouth(VIS(ch)); await wait(/[ ,.;:!?]/.test(ch) ? ms * 1.6 : ms); }
-  if (rig.token === token) { rig.speaking = false; rig.setMouth(rig.happy ? 'smile_closed' : rig.rest); }
-}
-const stopSpeak = rig => { if (rig) { rig.token = {}; rig.speaking = false; rig.setMouth(rig.rest); } };
+/* ---------- botões magnéticos ---------- */
+if (FINE) $$('[data-magnetic]').forEach(b => {
+  let raf = 0;
+  b.addEventListener('pointermove', e => {
+    if (reduced()) return;
+    const r = b.getBoundingClientRect(), x = e.clientX - r.left - r.width / 2, y = e.clientY - r.top - r.height / 2;
+    cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { b.style.transform = `translate(${x * .28}px,${y * .38}px)`; });
+  });
+  b.addEventListener('pointerleave', () => { cancelAnimationFrame(raf); b.style.transition = 'transform .6s cubic-bezier(.16,1,.3,1)'; b.style.transform = ''; setTimeout(() => (b.style.transition = ''), 600); });
+});
 
-/* loop: olhar segue o ponteiro, piscadas naturais */
-function tick(now) {
-  for (const r of rigs) {
-    if (!r.host.isConnected) continue;
-    const b = r.host.getBoundingClientRect();
-    if (b.bottom < 0 || b.top > innerHeight) continue;
-    if (!reduced()) {
-      const cx = b.left + b.width / 2, cy = b.top + b.height * .32;
-      const idle = now - pointer.t > 4000;
-      let dx = idle ? Math.sin(now / 1900 + r.host.offsetLeft) * .5 : (pointer.x - cx), dy = idle ? 0 : (pointer.y - cy);
-      const dist = Math.hypot(dx, dy) || 1, k = Math.min(1, dist / 260);
-      r.tgt.x = idle ? dx * 2.6 : dx / dist * 3.4 * k; r.tgt.y = idle ? 0 : dy / dist * 2.2 * k;
-      r.gaze.x += (r.tgt.x - r.gaze.x) * .14; r.gaze.y += (r.tgt.y - r.gaze.y) * .14;
-      r.setGaze(r.gaze.x, r.gaze.y);
-      if (now > r.blinkAt) { r.blink(); r.blinkAt = now + 2600 + Math.random() * 3600; }
+/* ---------- inclinação 3D + brilho ---------- */
+$$('[data-tilt]').forEach(el => {
+  if (!FINE) return;
+  const max = +el.dataset.tiltMax || 6;
+  const glare = d.createElement('span'); glare.className = 'glare'; glare.setAttribute('aria-hidden', 'true'); el.appendChild(glare);
+  if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+  let raf = 0;
+  el.addEventListener('pointermove', e => {
+    if (reduced()) return;
+    const r = el.getBoundingClientRect(), px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {
+      el.style.transform = `perspective(900px) rotateX(${(.5 - py) * max}deg) rotateY(${(px - .5) * max}deg)`;
+      el.style.setProperty('--gx', px * 100 + '%'); el.style.setProperty('--gy', py * 100 + '%');
+    });
+  });
+  el.addEventListener('pointerenter', () => { el.style.transition = 'transform .15s'; });
+  el.addEventListener('pointerleave', () => { cancelAnimationFrame(raf); el.style.transition = 'transform .7s cubic-bezier(.16,1,.3,1)'; el.style.transform = ''; });
+});
+
+/* ---------- profundidade dos chips do hero ---------- */
+const depth = $$('[data-depth]');
+if (depth.length && FINE) {
+  let raf = 0;
+  addEventListener('pointermove', () => {
+    if (reduced()) return; cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => { const nx = P.x / innerWidth - .5, ny = P.y / innerHeight - .5; depth.forEach(el => { const k = +el.dataset.depth; el.style.translate = `${nx * k}px ${ny * k}px`; }); });
+  }, { passive: true });
+}
+
+/* ---------- marquee com velocidade da rolagem ---------- */
+$$('[data-marquee]').forEach(m => {
+  const tr = $('.marquee__track', m); if (!tr || !tr.getAnimations) return;
+  let rate = 1, vis = false;
+  onView(m, v => (vis = v));
+  const loop = () => {
+    if (vis && !reduced()) {
+      const a = tr.getAnimations()[0];
+      if (a) { const target = 1 + clamp(Math.abs(vel) / 12, 0, 5); rate = lerp(rate, target, .08); a.playbackRate = rate; }
+    }
+    vel *= .9; requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+});
+
+/* ---------- contadores ---------- */
+$$('[data-count]').forEach(el => {
+  const n = +el.dataset.count, suf = el.dataset.suffix || '';
+  if (reduced()) return;
+  el.textContent = '0' + suf;
+  onView(el, v => {
+    if (!v) return;
+    const t0 = performance.now(), dur = 1500;
+    const step = now => { const k = clamp((now - t0) / dur), e = 1 - Math.pow(1 - k, 4); el.textContent = Math.round(n * e) + suf; if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }, { once: true, threshold: .6 });
+});
+
+/* ---------- máscara sob o ponteiro (lente PT→EN e piso) ---------- */
+function maskArea(area, vx, vy, opts = {}) {
+  let last = 0, vis = false, sweepT = Math.random() * 10;
+  const set = (x, y) => { area.style.setProperty(vx, x + 'px'); area.style.setProperty(vy, y + 'px'); };
+  const move = e => { const r = area.getBoundingClientRect(); set(e.clientX - r.left, e.clientY - r.top); last = performance.now(); };
+  area.addEventListener('pointermove', move);
+  area.addEventListener('pointerdown', move);
+  onView(area, v => (vis = v));
+  const loop = now => {
+    if (vis && now - last > 2200 && !opts.stopped?.()) {
+      if (reduced()) { const r = area.getBoundingClientRect(); set(r.width * .5, r.height * .5); }
+      else { sweepT += .012; const r = area.getBoundingClientRect(); set(r.width * (.5 + .38 * Math.sin(sweepT)), r.height * (.5 + .3 * Math.sin(sweepT * 1.7))); }
+    }
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+$$('[data-lens]').forEach(l => {
+  const stack = $('.lens__stack', l), btn = $('[data-lens-all]', l), hint = $('[data-lens-hint]', l);
+  if (!FINE && hint) hint.textContent = 'Toque e arraste: o português vira inglês';
+  stack.dataset.cursorLabel = 'EN';
+  maskArea(stack, '--lx', '--ly', { stopped: () => l.classList.contains('is-all') });
+  btn?.addEventListener('click', () => { const on = l.classList.toggle('is-all'); btn.setAttribute('aria-pressed', on); btn.textContent = on ? 'Voltar ao português' : 'Ver tudo em inglês'; });
+});
+$$('[data-tile-reveal]').forEach(t => {
+  const hint = $('[data-tile-hint]', t); if (!FINE && hint) hint.textContent = 'Toque e arraste para revelar o piso';
+  t.dataset.cursorLabel = 'Piso';
+  maskArea(t, '--tx', '--ty');
+});
+
+/* ---------- vídeos sob demanda ---------- */
+const vsrc = name => MEDIA + name + VEXT;
+function loadVid(v) { if (!v.dataset.loaded && v.dataset.lazyVideo) { v.src = vsrc(v.dataset.lazyVideo); v.dataset.loaded = '1'; } }
+$$('video[data-lazy-video]').forEach(v => {
+  if (!canVideo()) { v.remove(); return; }
+  const hover = v.hasAttribute('data-hover-video') && FINE;
+  const host = v.closest('.who-card,.tile') || v.parentNode;
+  const on = () => { loadVid(v); v.play().then(() => v.classList.add('is-on')).catch(() => {}); };
+  const off = () => { v.pause(); v.classList.remove('is-on'); };
+  if (hover) { host.addEventListener('pointerenter', on); host.addEventListener('pointerleave', off); }
+  else onView(v, vis => vis ? on() : off(), { threshold: .55 });
+});
+
+/* ---------- carrosséis com arraste, inércia e autoplay ---------- */
+$$('[data-carousel]').forEach(car => {
+  const track = $('.car__track', car), items = [...track.children];
+  const prev = $('[data-car-prev]', car), next = $('[data-car-next]', car), pbtn = $('[data-car-pause]', car);
+  const bar = $('.car__bar i', car), count = $('[data-car-count]', car);
+  const every = +car.dataset.autoplay || 0;
+  let userPaused = reduced(), hover = false, focus = false, vis = false, holdUntil = 0, timer = 0;
+  track.dataset.cursorLabel = 'Arraste';
+  items.forEach((it, i) => it.setAttribute('aria-label', `${i + 1} de ${items.length}`));
+  const off = i => items[i].offsetLeft - items[0].offsetLeft;
+  const idx = () => { const x = track.scrollLeft; let best = 0, bd = 1e9; items.forEach((it, i) => { const dd = Math.abs(off(i) - x); if (dd < bd) { bd = dd; best = i; } }); return best; };
+  const atEnd = () => track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
+  const go = i => { i = (i + items.length) % items.length; track.scrollTo({ left: off(i), behavior: reduced() ? 'auto' : 'smooth' }); };
+  const ui = () => {
+    const max = track.scrollWidth - track.clientWidth;
+    const k = max > 0 ? track.scrollLeft / max : 1;
+    bar?.style.setProperty('--cp', (.12 + .88 * k).toFixed(3));
+    if (count) { const i = atEnd() ? items.length - 1 : idx(); count.textContent = String(i + 1).padStart(2, '0') + '/' + String(items.length).padStart(2, '0'); }
+  };
+  track.addEventListener('scroll', () => requestAnimationFrame(ui), { passive: true }); ui();
+  const step = dir => { if (dir > 0 && atEnd()) go(0); else go(idx() + dir); };
+  prev?.addEventListener('click', () => { holdUntil = performance.now() + 9000; step(-1); });
+  next?.addEventListener('click', () => { holdUntil = performance.now() + 9000; step(1); });
+  track.addEventListener('keydown', e => { if (e.key === 'ArrowRight') { e.preventDefault(); step(1); holdUntil = performance.now() + 9000; } if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); holdUntil = performance.now() + 9000; } });
+  // arraste com mouse e inércia (no toque, a rolagem nativa já tem inércia)
+  let down = false, sx = 0, sl = 0, lx = 0, lt = 0, v = 0, moved = false, raf = 0;
+  track.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' || e.button !== 0) return; down = true; moved = false; sx = lx = e.clientX; sl = track.scrollLeft; lt = performance.now(); v = 0; cancelAnimationFrame(raf); });
+  addEventListener('pointermove', e => {
+    if (!down) return; const dx = e.clientX - sx;
+    if (!moved && Math.abs(dx) > 5) { moved = true; track.classList.add('is-drag'); }
+    if (!moved) return;
+    const now = performance.now(); v = (e.clientX - lx) / Math.max(1, now - lt); lx = e.clientX; lt = now;
+    track.scrollLeft = sl - dx;
+  });
+  addEventListener('pointerup', () => {
+    if (!down) return; down = false; holdUntil = performance.now() + 9000;
+    if (!moved) return;
+    let vv = -v * 16;
+    const glide = () => { track.scrollLeft += vv; vv *= .93; if (Math.abs(vv) > .6) raf = requestAnimationFrame(glide); else { track.classList.remove('is-drag'); go(idx()); } };
+    if (reduced()) { track.classList.remove('is-drag'); go(idx()); } else raf = requestAnimationFrame(glide);
+  });
+  track.addEventListener('click', e => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+  track.addEventListener('dragstart', e => e.preventDefault());
+  car.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') hover = true; });
+  car.addEventListener('pointerleave', () => (hover = false));
+  car.addEventListener('focusin', () => (focus = true));
+  car.addEventListener('focusout', () => (focus = false));
+  track.addEventListener('touchstart', () => (holdUntil = performance.now() + 9000), { passive: true });
+  onView(car, x => (vis = x), { threshold: .35 });
+  const setP = p => { userPaused = p; if (!pbtn) return; pbtn.setAttribute('aria-pressed', p); pbtn.setAttribute('aria-label', p ? (T.playCar || 'Continuar carrossel') : (T.pauseCar || 'Pausar carrossel')); pbtn.innerHTML = p ? ICON_PLAY : ICON_PAUSE; };
+  if (pbtn) { if (!every) pbtn.remove(); else { setP(userPaused); pbtn.addEventListener('click', () => setP(!userPaused)); } }
+  if (every) timer = setInterval(() => { if (userPaused || hover || focus || !vis || down || d.hidden || performance.now() < holdUntil) return; step(1); }, every);
+});
+
+/* ---------- passos em rolagem horizontal fixada (desktop) ---------- */
+$$('[data-hsteps]').forEach(h => {
+  const vp = $('.hsteps__viewport', h), tr = $('.hsteps__track', h);
+  let dist = 0, on = false;
+  const setup = () => {
+    on = innerWidth >= 1000 && !reduced();
+    h.classList.toggle('is-pinned', on);
+    tr.style.transform = '';
+    if (!on) { h.style.removeProperty('--hs-h'); return; }
+    dist = Math.max(0, tr.scrollWidth - innerWidth + 80);
+    h.style.setProperty('--hs-h', (innerHeight + dist) + 'px');
+    upd();
+  };
+  const upd = () => { if (!on) return; const r = h.getBoundingClientRect(); const k = clamp(-r.top / Math.max(1, dist)); tr.style.transform = `translate3d(${-k * dist}px,0,0)`; };
+  pinned.push(upd);
+  addEventListener('resize', () => requestAnimationFrame(setup)); setup();
+  addEventListener('load', setup);
+});
+
+/* ---------- squad / medidores ---------- */
+$$('[data-squad]').forEach(s => onView(s, v => v && s.classList.add('is-in'), { once: true, threshold: .4 }));
+
+/* ---------- texto que se preenche ---------- */
+const fills = $$('[data-fill]').map(f => {
+  if (!f.getAttribute('aria-label')) f.setAttribute('aria-label', f.textContent.replace(/\s+/g, ' ').trim());
+  const walk = node => [...node.childNodes].forEach(n => {
+    if (n.nodeType === 3) { const frag = d.createDocumentFragment(); [...n.textContent].forEach(ch => { if (ch === ' ') frag.appendChild(d.createTextNode(' ')); else { const s = d.createElement('span'); s.className = 'ch'; s.textContent = ch; s.setAttribute('aria-hidden', 'true'); frag.appendChild(s); } }); n.replaceWith(frag); }
+    else if (n.nodeType === 1) walk(n);
+  });
+  walk(f);
+  return { f, chs: $$('.ch', f) };
+});
+const fillTo = (o, k) => { const n = Math.round(o.chs.length * k); o.chs.forEach((c, i) => c.classList.toggle('on', i < n)); };
+
+/* ---------- agente digitando (demonstração ilustrativa) ---------- */
+const AGENT = [
+  ['p', '$ spla-agent montar-sessao --hoje'],
+  ['dim', '› perfil      analista SAP FI · time global'],
+  ['dim', '› objetivo    falar na daily sem travar'],
+  ['dim', '› nível       B1 (referência CEFR)'],
+  ['ok', '✓ revisão     on track · follow up · blocker'],
+  ['ok', '✓ novo        “flag a risk” · “push back”'],
+  ['ok', '✓ gramática   he / she / it + -s'],
+  ['ok', '✓ pronúncia   “th” em three e think'],
+  ['ok', '✓ conversa    daily com a Sophia'],
+  ['hl', '→ foco de correção: -s na 3ª pessoa'],
+  ['p', '→ sessão pronta · 20–30 min · tamo junto']
+];
+$$('[data-agent]').forEach(a => {
+  const body = $('[data-agent-body]', a); let started = false, vis = false;
+  const render = n => { let html = ''; let left = n; for (const [c, t] of AGENT) { if (left <= 0) break; const s = t.slice(0, left); left -= t.length + 1; html += `<span class="${c}">${s.replace(/</g, '&lt;')}</span>\n`; } body.innerHTML = html + '<span class="caret"></span>'; };
+  const total = AGENT.reduce((s, [, t]) => s + t.length + 1, 0);
+  if (reduced()) { render(total); return; }
+  onView(a, v => { vis = v; if (v && !started) { started = true; run(); } }, { threshold: .35 });
+  async function run() {
+    for (;;) {
+      for (let n = 0; n <= total; n += 2) { while (!vis || d.hidden) await wait(250); render(n); await wait(16); }
+      await wait(5200); body.innerHTML = '<span class="caret"></span>'; await wait(500);
     }
   }
-  requestAnimationFrame(tick);
-}
-requestAnimationFrame(tick);
+});
 
-const lazyRigs = $$('[data-rig]');
-if ('IntersectionObserver' in window) {
-  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { io.unobserve(e.target); if (!e.target.dataset.manual) mountRig(e.target); } }), { rootMargin: '200px' });
-  lazyRigs.forEach(h => io.observe(h));
-} else lazyRigs.forEach(h => !h.dataset.manual && mountRig(h));
-
-/* ---------- transcrição animada da home ---------- */
-const stage = $('[data-stage]');
-if (stage) (async () => {
-  const scenes = window.SPLA_SCENES || [];
-  if (!scenes.length) return;
-  const host = $('[data-rig]', stage); host.dataset.manual = '1';
-  const rig = await mountRig(host);
-  const tag = $('[data-tag]', stage), pt = $('[data-pt]', stage), en = $('[data-en]', stage), hint = $('[data-hint]', stage);
-  const dots = $('.dots', stage), pauseBtn = $('[data-pause]', stage);
-  let i = 0, paused = reduced(), run = 0;
-  scenes.forEach((s, n) => { const b = d.createElement('button'); b.type = 'button'; b.textContent = s.tag; b.setAttribute('aria-pressed', n === 0); b.addEventListener('click', () => { i = n; play(true); }); dots.appendChild(b); });
-  const setPause = v => { paused = v; pauseBtn.setAttribute('aria-pressed', v); pauseBtn.setAttribute('aria-label', v ? (T.play || 'Continuar animação') : (T.pause || 'Pausar animação')); pauseBtn.innerHTML = v ? '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4l10 6-10 6z" fill="currentColor"/></svg>' : '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 4h3v12H5zM12 4h3v12h-3z" fill="currentColor"/></svg>'; if (!v) play(); };
-  pauseBtn.addEventListener('click', () => setPause(!paused));
-  async function play(manual) {
-    const my = ++run; const s = scenes[i];
-    $$('button', dots).forEach((b, n) => b.setAttribute('aria-pressed', n === i));
-    tag.textContent = s.area; pt.textContent = s.pt; hint.classList.remove('on');
-    hint.innerHTML = `<b>${T.hint || 'Dica da Sophia'}:</b> <span>${s.hint}</span>`;
-    const words = s.en.split(' ');
-    en.innerHTML = words.map(w => `<span class="w${s.keys.some(k => w.toLowerCase().replace(/[^a-z'-]/g, '').startsWith(k)) ? ' key' : ''}">${w}</span>`).join(' ');
-    const ws = $$('.w', en);
-    if (reduced()) { ws.forEach(w => w.classList.add('on')); hint.classList.add('on'); return; }
-    stopSpeak(rig); await wait(manual ? 150 : 650); if (my !== run) return;
-    for (const w of ws) {
-      if (my !== run) return;
-      w.classList.add('on');
-      if (rig) speak(rig, w.textContent + ' ', 48);
-      await wait(Math.max(260, w.textContent.length * 62));
+/* ---------- fundo interativo do hero (canvas) ---------- */
+const VOICE = { level: 0, target: 0, who: 'sophia' };
+$$('[data-field]').forEach(cv => {
+  const hero = cv.parentNode, ctx = cv.getContext('2d'); if (!ctx) return;
+  const call = $('.call', hero);
+  let W = 0, H = 0, dpr = 1, pts = [], vis = true, cxy = { x: 0, y: 0 }, mx = -999, my = -999, t = 0;
+  const size = () => {
+    const r = hero.getBoundingClientRect(); W = r.width; H = r.height; dpr = Math.min(1.5, devicePixelRatio || 1);
+    cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    const gap = W < 700 ? 30 : 36; pts = [];
+    for (let y = gap / 2; y < H; y += gap) for (let x = gap / 2; x < W; x += gap) pts.push(x, y);
+    if (call) { const c = call.getBoundingClientRect(); cxy = { x: c.left - r.left + c.width / 2, y: c.top - r.top + c.height * .42 }; }
+    else cxy = { x: W * .7, y: H * .45 };
+    if (reduced()) draw(0);
+  };
+  hero.addEventListener('pointermove', e => { const r = hero.getBoundingClientRect(); mx = e.clientX - r.left; my = e.clientY - r.top; });
+  hero.addEventListener('pointerleave', () => { mx = my = -999; });
+  function draw(dt) {
+    t += dt; VOICE.level = lerp(VOICE.level, VOICE.target * (.55 + .45 * Math.abs(Math.sin(t * 9.1) * Math.sin(t * 3.7))), .18);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    const lvl = VOICE.level, R = 190;
+    for (let i = 0; i < pts.length; i += 2) {
+      const x = pts[i], y = pts[i + 1];
+      const dxm = x - mx, dym = y - my, dm = Math.hypot(dxm, dym);
+      const near = dm < R ? 1 - dm / R : 0;
+      const dc = Math.hypot(x - cxy.x, y - cxy.y);
+      const ring = lvl > .02 ? Math.max(0, Math.cos((dc - t * 260) / 46)) * Math.exp(-dc / 520) * lvl : 0;
+      const amb = .5 + .5 * Math.sin(x * .012 + y * .009 + t * .8);
+      const s = 1.1 + near * 3.4 + ring * 3 + amb * .5;
+      const a = .07 + near * .5 + ring * .55 + amb * .04;
+      const ox = near ? dxm / (dm || 1) * near * 10 : 0, oy = near ? dym / (dm || 1) * near * 10 : 0;
+      ctx.globalAlpha = Math.min(.9, a);
+      ctx.fillStyle = near > .35 ? '#C8102E' : (ring > .25 ? (VOICE.who === 'you' ? '#E0A800' : '#C8102E') : '#0B1119');
+      const px = x + ox, py = y + oy;
+      ctx.beginPath(); ctx.moveTo(px, py - s); ctx.lineTo(px + s, py); ctx.lineTo(px, py + s); ctx.lineTo(px - s, py); ctx.closePath(); ctx.fill();
     }
-    stopSpeak(rig); rig?.setMouth('smile_closed');
-    await wait(500); if (my !== run) return; hint.classList.add('on');
-    await wait(4200); if (my !== run || paused) return;
-    rig?.setMouth(rig.rest);
-    i = (i + 1) % scenes.length; play();
+    ctx.globalAlpha = 1;
   }
-  setPause(paused); if (paused) play();
-  d.addEventListener('visibilitychange', () => { if (d.hidden) run++; else if (!paused) play(); });
+  let lt = performance.now();
+  const loop = now => { const dt = Math.min(.05, (now - lt) / 1000); lt = now; if (vis && !d.hidden && !reduced()) draw(dt); requestAnimationFrame(loop); };
+  onView(hero, v => (vis = v));
+  addEventListener('resize', () => requestAnimationFrame(size)); size();
+  addEventListener('load', size);
+  requestAnimationFrame(loop);
+});
+
+/* ---------- tela de chamada da Sophia (vídeo + legenda ao vivo) ---------- */
+const call = $('[data-call]');
+const DIALOGS = window.SPLA_DIALOGS || [];
+if (call && DIALOGS.length) (() => {
+  const vids = $$('.call__vid', call), subs = $('[data-call-subs]', call), tag = $('[data-call-tag]', call);
+  const dots = $('[data-call-dots]', call), pbtn = $('[data-call-pause]', call), clock = $('[data-call-time]', call);
+  const wave = $('[data-call-wave]', call), wctx = wave?.getContext('2d');
+  const useVid = canVideo() && vids.length === 2;
+  if (!useVid) vids.forEach(v => v.remove());
+  let i = 0, run = 0, userPaused = reduced(), offscreen = false, cur = 0, secs = 0;
+  const paused = () => userPaused || offscreen || d.hidden;
+  const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const words = s => s.split(' ').map(w => `<span class="w">${esc(w)}</span>`).join(' ');
+  // espera que respeita pausa e troca de cena
+  const sleep = async (ms, my) => { let left = ms; while (left > 0) { if (my !== run) throw 0; if (paused()) { await wait(120); continue; } const st = Math.min(60, left); await wait(st); left -= st; } if (my !== run) throw 0; };
+  // vídeo em buffer duplo
+  const prep = (v, name) => { if (v.dataset.clip !== name) { v.dataset.clip = name; v.src = vsrc('sophia-' + name); v.preload = 'auto'; v.load(); } };
+  async function clip(name, nextName, my, body) {
+    let v = null;
+    if (useVid) {
+      v = vids[cur]; const o = vids[1 - cur];
+      prep(v, name); try { v.currentTime = 0; } catch (e) {}
+      await v.play().catch(() => {});
+      v.classList.add('is-on'); setTimeout(() => { o.classList.remove('is-on'); setTimeout(() => prep(o, nextName), 300); }, 120);
+    }
+    const t0 = performance.now();
+    const bodyP = body ? body().catch(e => { if (e !== 0) console.warn(e); }) : null;
+    let played = 0;
+    while (true) {
+      if (my !== run) { v?.pause(); throw 0; }
+      if (paused()) { v && !v.paused && v.pause(); await wait(120); continue; }
+      if (v && v.paused && !v.ended) v.play().catch(() => {});
+      await wait(60); played += 60;
+      if (v ? (v.ended || (v.duration && v.currentTime >= v.duration - .04) || played > 9000) : played >= 5000) break;
+    }
+    await bodyP;
+    if (useVid) cur = 1 - cur;
+  }
+  const push = (cls, html) => {
+    $$('.sub', subs).forEach(s => s.classList.add('sub--old'));
+    const old = $$('.sub--old', subs); while (old.length > 1) old.shift().remove();
+    const p = d.createElement('p'); p.className = 'sub ' + cls; p.innerHTML = html; subs.appendChild(p); return p;
+  };
+  const reveal = async (p, dur, my, who) => {
+    const ws = $$('.w', p); const per = Math.max(160, dur / Math.max(1, ws.length));
+    VOICE.who = who; VOICE.target = 1;
+    for (const w of ws) { w.classList.add('on'); const ins = $('ins[hidden]', w); if (ins) { await sleep(320, my); ins.hidden = false; } await sleep(per, my); }
+    VOICE.target = 0;
+  };
+  function youHTML(s) {
+    const toks = s.you.split(' '); let k = -1;
+    toks.forEach((t, n) => { if (t.replace(/[^\w'’-]/g, '').toLowerCase() === s.wrong.toLowerCase()) k = n; });
+    return toks.map((t, n) => {
+      if (n !== k) return `<span class="w">${esc(t)}</span>`;
+      const m = t.match(/^(.*?)([.,!?]*)$/);
+      return `<span class="w"><s>${esc(m[1])}</s> <ins hidden>${esc(s.right)}</ins>${m[2]}</span>`;
+    }).join(' ');
+  }
+  const who = n => `<b class="who">${n}</b>`;
+  function staticScene(s) {
+    subs.innerHTML = '';
+    push('', who('Sophia') + esc(s.sophia));
+    const y = push('sub--you', who(T.you || 'Você') + youHTML(s)); $$('ins', y).forEach(x => (x.hidden = false)); $$('.w', y).forEach(w => w.classList.add('on'));
+    push('sub--tip', `<b>${T.tipLabel || 'Dica da Sophia'}:</b> ${s.tip}`);
+    $$('.sub', subs).forEach(x => x.classList.remove('sub--old'));
+  }
+  function mark() { $$('button', dots).forEach((b, n) => b.setAttribute('aria-pressed', n === i)); tag.textContent = DIALOGS[i].tag; }
+  async function scene(my) {
+    const s = DIALOGS[i]; mark();
+    await clip('speak1', 'nod', my, async () => { await sleep(350, my); const p = push('', who('Sophia') + words(s.sophia)); await reveal(p, 3600, my, 'sophia'); });
+    await clip('nod', 'happy', my, async () => { await sleep(250, my); const p = push('sub--you', who(T.you || 'Você') + youHTML(s)); await reveal(p, 3300, my, 'you'); });
+    await clip('happy', 'speak1', my, async () => { await sleep(200, my); const p = push('', who('Sophia') + words(s.reply)); await reveal(p, 2600, my, 'sophia'); await sleep(250, my); push('sub--tip', `<b>${T.tipLabel || 'Dica da Sophia'}:</b> ${s.tip}`); });
+  }
+  async function loop() {
+    const my = ++run; VOICE.target = 0;
+    if (reduced()) { staticScene(DIALOGS[i]); mark(); return; }
+    subs.innerHTML = '';
+    try { for (;;) { await scene(my); i = (i + 1) % DIALOGS.length; } } catch (e) { if (e !== 0) console.warn(e); }
+  }
+  DIALOGS.forEach((s, n) => { const b = d.createElement('button'); b.type = 'button'; b.textContent = s.tag; b.setAttribute('aria-pressed', n === 0); b.setAttribute('aria-label', (T.scene || 'Cena') + ': ' + s.tag); b.addEventListener('click', () => { i = n; if (reduced()) { staticScene(DIALOGS[i]); mark(); } else { if (userPaused) setP(false); loop(); } }); dots.appendChild(b); });
+  const setP = p => { userPaused = p; pbtn.setAttribute('aria-pressed', p); pbtn.setAttribute('aria-label', p ? (T.playDemo || 'Continuar demonstração') : (T.pauseDemo || 'Pausar demonstração')); pbtn.innerHTML = p ? ICON_PLAY : ICON_PAUSE; if (p) vids.forEach(v => v.pause()); };
+  pbtn.addEventListener('click', () => { const wasStatic = reduced(); setP(!userPaused); if (wasStatic && !userPaused) { /* sem animação: só alterna a cena */ i = (i + 1) % DIALOGS.length; staticScene(DIALOGS[i]); mark(); } });
+  if (pbtn) setP(userPaused);
+  onView(call, v => (offscreen = !v));
+  setInterval(() => { if (!paused()) { secs++; clock.textContent = String(Math.floor(secs / 60)).padStart(2, '0') + ':' + String(secs % 60).padStart(2, '0'); } }, 1000);
+  // ondas de voz
+  if (wctx && !reduced()) {
+    const bars = 44; const hs = new Array(bars).fill(0); let t = 0;
+    const draw = () => {
+      if (!paused()) {
+        t += .016; const W = wave.width, H = wave.height, bw = W / bars;
+        wctx.clearRect(0, 0, W, H);
+        wctx.fillStyle = VOICE.who === 'you' ? '#F5C518' : '#FFFFFF';
+        for (let k = 0; k < bars; k++) {
+          const tgt = VOICE.level * (.25 + .75 * Math.abs(Math.sin(k * .7 + t * 11) * Math.cos(k * .23 - t * 5))) + .06;
+          hs[k] = lerp(hs[k], tgt, .3); const h = Math.max(2, hs[k] * H);
+          wctx.globalAlpha = .55 + .45 * hs[k]; wctx.fillRect(k * bw + bw * .25, (H - h) / 2, bw * .5, h);
+        }
+      }
+      requestAnimationFrame(draw);
+    };
+    requestAnimationFrame(draw);
+  }
+  // começa depois do carregamento para não competir com o LCP
+  const start = () => { if (useVid) { prep(vids[0], 'speak1'); prep(vids[1], 'nod'); } loop(); };
+  if (reduced()) loop(); else if (d.readyState === 'complete') setTimeout(start, 400); else addEventListener('load', () => setTimeout(start, 400), { once: true });
+  d.addEventListener('visibilitychange', () => { if (d.hidden) vids.forEach(v => v.pause()); });
+  RM.addEventListener?.('change', () => location.reload());
 })();
 
 /* ---------- cartões de jargão ---------- */
@@ -202,7 +533,7 @@ $$('.jcard button').forEach(b => b.addEventListener('click', () => { const c = b
 /* ---------- diagnóstico rápido ---------- */
 const diag = $('[data-diag]');
 if (diag) {
-  const out = $('[data-diag-out]', diag), wa = $('[data-wa]', diag), mail = $('[data-mail]', diag), txt = $('[data-diag-text]', diag);
+  const out = $('[data-diag-out]', diag), wa = $('[data-wa]', diag), mail = $('[data-mail]', diag), txt = $('[data-diag-text]', diag), meter = $('.diag__meter', diag), mtxt = $('[data-diag-count]', diag);
   const upd = () => {
     const v = n => $(`input[name="${n}"]:checked`, diag)?.value;
     const who = v('quem'), area = v('area'), goal = v('meta'), lvl = v('nivel');
@@ -216,6 +547,8 @@ if (diag) {
     wa.href = 'https://wa.me/5511981783554?text=' + encodeURIComponent(msg);
     mail.href = 'mailto:contact@splacademy.com.br?subject=' + encodeURIComponent(T.diagSubject || 'Quero saber mais sobre a SPLA') + '&body=' + encodeURIComponent(msg);
     out.hidden = false;
+    const n = [who, area, goal, lvl].filter(Boolean).length;
+    meter?.style.setProperty('--dm', n / 4); if (mtxt) mtxt.textContent = n + '/4';
   };
   diag.addEventListener('change', upd); upd();
 }
@@ -224,24 +557,23 @@ if (diag) {
 const FAQ = (window.SPLA_FAQ || []).map(f => ({ ...f, a: f.a.split('{{root}}').join(BASE) }));
 const fab = $('.sophia-fab'), panel = $('#sophia');
 if (fab && panel && FAQ.length) {
-  const log = $('.sp__log', panel), chips = $('.sp__chips', panel), form = $('.sp__form', panel), input = $('input', form);
-  const face = $('[data-rig]', panel); face.dataset.manual = '1';
-  let rig = null, greeted = false;
+  const log = $('.sp__log', panel), chips = $('.sp__chips', panel), form = $('.sp__form', panel), input = $('input', form), face = $('.sp__face', panel);
+  let greeted = false;
   const norm = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ');
   const STOP = new Set('a o e de da do das dos que como um uma para pra com no na nos nas em eu voce vcs voces se ser e é the is do to of and meu minha tem ter qual quais quanto'.split(' '));
   const add = (html, who) => { const m = d.createElement('div'); m.className = 'msg msg--' + who; m.innerHTML = html; log.appendChild(m); log.scrollTop = log.scrollHeight; return m; };
   async function answer(item) {
     const t = d.createElement('div'); t.className = 'msg msg--s typing'; t.innerHTML = '<i></i><i></i><i></i>'; t.setAttribute('aria-hidden', 'true'); log.appendChild(t); log.scrollTop = log.scrollHeight;
+    face?.classList.add('is-talking');
     await wait(reduced() ? 0 : 520); t.remove();
     const m = add('', 's');
-    const plain = item.a.replace(/<[^>]+>/g, '');
-    if (rig) speak(rig, plain.slice(0, 160), 34);
     if (reduced()) { m.innerHTML = item.a; }
-    else { // escreve como legenda
+    else {
       const tmp = d.createElement('div'); tmp.innerHTML = item.a; const full = item.a;
       const text = tmp.textContent; let n = 0;
       await new Promise(res => { const step = () => { n += 3; m.textContent = text.slice(0, n); log.scrollTop = log.scrollHeight; if (n < text.length) setTimeout(step, 14); else { m.innerHTML = full; res(); } }; step(); });
     }
+    face?.classList.remove('is-talking');
     log.scrollTop = log.scrollHeight;
     renderChips(item.next);
   }
@@ -255,19 +587,16 @@ if (fab && panel && FAQ.length) {
     }
     return score >= 2 ? best : null;
   }
+  const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   function renderChips(ids) {
     chips.innerHTML = '';
     const list = (ids && ids.length ? ids.map(id => FAQ.find(f => f.id === id)).filter(Boolean) : FAQ.filter(f => f.chip)).slice(0, 4);
     list.forEach(it => { const b = d.createElement('button'); b.type = 'button'; b.textContent = it.q; b.addEventListener('click', () => { add(esc(it.q), 'u'); answer(it); }); chips.appendChild(b); });
   }
-  const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const open = async v => {
+  const open = v => {
     fab.setAttribute('aria-expanded', v); panel.classList.toggle('is-open', v); panel.setAttribute('aria-hidden', !v);
-    if (v) {
-      if (!rig) rig = await mountRig(face);
-      if (!greeted) { greeted = true; answer({ a: T.spHello || 'Oi! Eu sou a Sophia.', next: [] }); }
-      setTimeout(() => input.focus(), 60);
-    } else fab.focus();
+    if (v) { if (!greeted) { greeted = true; answer({ a: T.spHello || 'Oi! Eu sou a Sophia.', next: [] }); } setTimeout(() => input.focus(), 60); }
+    else fab.focus();
   };
   fab.addEventListener('click', () => open(true));
   $('.sp__close', panel).addEventListener('click', () => open(false));
@@ -279,4 +608,44 @@ if (fab && panel && FAQ.length) {
   });
   $$('[data-open-sophia]').forEach(b => b.addEventListener('click', e => { e.preventDefault(); open(true); }));
 }
+
+/* ---------- movimento rico: GSAP + ScrollTrigger + Lenis, só se permitido ---------- */
+const scrubs = [];
+$$('.timeline').forEach(el => scrubs.push({ el, prop: '--tl', start: 'top 75%', end: 'bottom 60%' }));
+$$('[data-sprint-line]').forEach(el => scrubs.push({ el, prop: '--sl', start: 'top 85%', end: 'top 45%' }));
+function fallbackMotion() {
+  fills.forEach(o => { if (reduced()) fillTo(o, 1); else onView(o.f, v => { if (!v) return; let k = 0; const st = () => { k += .03; fillTo(o, Math.min(1, k)); if (k < 1) requestAnimationFrame(st); }; requestAnimationFrame(st); }, { once: true, threshold: .6 }); });
+  scrubs.forEach(s => s.el.style.setProperty(s.prop, 1));
+}
+const loadJS = src => new Promise((res, rej) => { const s = d.createElement('script'); s.src = src; s.async = true; s.onload = res; s.onerror = rej; d.head.appendChild(s); });
+function initMotion() {
+  const { gsap, ScrollTrigger, Lenis } = window;
+  if (!gsap || !ScrollTrigger) return fallbackMotion();
+  gsap.registerPlugin(ScrollTrigger);
+  if (Lenis && FINE) {
+    lenis = new Lenis({ lerp: .11, wheelMultiplier: 1, anchors: { offset: -80 }, prevent: n => !!(n.closest && n.closest('.sp, .drawer, .table-wrap, .car__track')) });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(t => lenis.raf(t * 1000)); gsap.ticker.lagSmoothing(0);
+    root.classList.add('lenis-on');
+  }
+  fills.forEach(o => ScrollTrigger.create({ trigger: o.f, start: 'top 82%', end: 'top 35%', scrub: true, onUpdate: st => fillTo(o, st.progress) }));
+  scrubs.forEach(s => { s.el.style.setProperty(s.prop, 0); ScrollTrigger.create({ trigger: s.el, start: s.start, end: s.end, scrub: true, onUpdate: st => s.el.style.setProperty(s.prop, st.progress.toFixed(3)) }); });
+  const hero = $('.hero');
+  if (hero) {
+    const callEl = $('.call', hero), copy = $('.hero__copy', hero);
+    if (callEl) gsap.to(callEl, { yPercent: -8, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
+    if (copy) gsap.to(copy, { y: -60, opacity: .25, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
+  }
+  $$('.foot__big').forEach(el => gsap.fromTo(el, { xPercent: 4 }, { xPercent: -18, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true } }));
+  $$('[data-speed]').forEach(el => gsap.to(el, { y: () => -(+el.dataset.speed) * 100, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true, invalidateOnRefresh: true } }));
+  addEventListener('load', () => ScrollTrigger.refresh());
+}
+if (reduced()) fallbackMotion();
+else {
+  const V = BASE + 'assets/vendor/';
+  const go = () => Promise.all([loadJS(V + 'gsap.min.js'), FINE ? loadJS(V + 'lenis.min.js') : Promise.resolve()])
+    .then(() => loadJS(V + 'ScrollTrigger.min.js')).then(initMotion).catch(fallbackMotion);
+  if (d.readyState === 'complete') idle(go); else addEventListener('load', () => idle(go), { once: true });
+}
+onScroll();
 })();
