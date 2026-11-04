@@ -1,0 +1,298 @@
+[
+ {
+  "id": "oque",
+  "chip": true,
+  "q": "O que é a SPLA?",
+  "k": [
+   "spla",
+   "escola",
+   "quem",
+   "oque",
+   "sobre"
+  ],
+  "a": "<p>A SPLA (São Paulo Languages Academy) é uma escola de idiomas nascida em São Paulo. Começamos pelo inglês, com outros idiomas a caminho.</p><p>Você treina o inglês das cenas do seu trabalho: reunião, entrevista, apresentação, viagem. Pratica comigo, a Sophia, faz exercícios com o Erick e recebe o feedback da Teacher Lili.</p>",
+  "next": [
+   "como",
+   "zero",
+   "empresa"
+  ]
+ },
+ {
+  "id": "como",
+  "chip": true,
+  "q": "Como funciona uma sessão?",
+  "k": [
+   "sessao",
+   "aula",
+   "funciona",
+   "rotina",
+   "estudar",
+   "metodo"
+  ],
+  "a": "<p>Uma sessão leva de 20 a 30 minutos. Você revisa o que estava quase esquecendo, aprende algo novo da sua área, vê uma regrinha de gramática bem curta, treina a pronúncia e fecha conversando comigo por voz numa situação real.</p><p>No final, você mesmo marca o que já consegue fazer. Os detalhes estão em <a href=\"{{root}}metodologia/\">Metodologia</a>.</p>",
+  "next": [
+   "tempo",
+   "ia",
+   "faltar"
+  ]
+ },
+ {
+  "id": "zero",
+  "chip": true,
+  "q": "Serve para quem está começando do zero?",
+  "k": [
+   "zero",
+   "iniciante",
+   "comecando",
+   "basico",
+   "nada",
+   "nivel",
+   "niveis",
+   "cefr"
+  ],
+  "a": "<p>Serve, sim. A trilha vai do zero ao C1 e segue os níveis do CEFR, a escala internacional usada para descrever o domínio de um idioma.</p><p>Você começa no ponto em que está hoje e sobe um degrau de cada vez.</p>",
+  "next": [
+   "tempo",
+   "certificado",
+   "garantia"
+  ]
+ },
+ {
+  "id": "tempo",
+  "q": "Quanto tempo por dia eu preciso?",
+  "k": [
+   "tempo",
+   "dia",
+   "minutos",
+   "horas",
+   "quanto",
+   "rapido",
+   "semanas"
+  ],
+  "a": "<p>Uma sessão por dia, de 20 a 30 minutos, já faz diferença, porque o que mais conta é a constância.</p><p>Não prometemos fluência em X semanas, porque idioma não funciona assim. O que a gente promete é um caminho claro e acompanhado, até você sair falando.</p>",
+  "next": [
+   "garantia",
+   "faltar"
+  ]
+ },
+ {
+  "id": "garantia",
+  "chip": true,
+  "q": "E se eu não sentir progresso?",
+  "k": [
+   "garantia",
+   "progresso",
+   "resultado",
+   "evoluir",
+   "evolucao",
+   "funciona",
+   "devolver"
+  ],
+  "a": "<p>Esse é o nosso compromisso: se você fizer as atividades e não sentir progresso, a gente refaz o seu plano sem custo.</p><p>Para você enxergar a evolução, repetimos tarefas de fala ao longo do tempo e mostramos o antes e o depois.</p>",
+  "next": [
+   "certificado",
+   "preco"
+  ]
+ },
+ {
+  "id": "preco",
+  "q": "Quanto custa?",
+  "k": [
+   "preco",
+   "precos",
+   "custa",
+   "valor",
+   "valores",
+   "plano",
+   "planos",
+   "mensalidade",
+   "pagar",
+   "pagamento"
+  ],
+  "a": "<p>O valor depende do formato: só pelo app, com aula ao vivo, ou contratado pela sua empresa.</p><p>Chama a gente no <a href=\"https://wa.me/5511981783554?text=Oi%2C%20SPLA!%20Quero%20saber%20sobre%20os%20formatos.\" target=\"_blank\" rel=\"noopener\">WhatsApp</a> que a gente explica direitinho e sem compromisso.</p>",
+  "next": [
+   "empresa",
+   "quando"
+  ]
+ },
+ {
+  "id": "ia",
+  "q": "A Sophia é uma pessoa?",
+  "k": [
+   "sophia",
+   "pessoa",
+   "robo",
+   "ia",
+   "inteligencia",
+   "artificial",
+   "humano",
+   "professor",
+   "professora"
+  ],
+  "a": "<p>Não. Eu sou uma inteligência artificial e sempre deixo isso claro.</p><p>Na conversa por voz, eu dou uma dica antes de entregar a resposta e corrijo só o que é o foco do dia, para você não travar. A avaliação e o feedback ficam com a Teacher Lili.</p>",
+  "next": [
+   "como",
+   "privacidade"
+  ]
+ },
+ {
+  "id": "faltar",
+  "q": "E se eu ficar uns dias sem estudar?",
+  "k": [
+   "faltar",
+   "parar",
+   "pausa",
+   "ferias",
+   "esquecer",
+   "dias",
+   "sem estudar",
+   "atrasar",
+   "perder"
+  ],
+  "a": "<p>A vida acontece. Quando você volta, o Back on Track retoma de onde você parou, sem perder o progresso e sem castigo.</p><p>Aqui, errar ou faltar nunca tira pontos de ninguém.</p>",
+  "next": [
+   "ranking",
+   "como"
+  ]
+ },
+ {
+  "id": "ranking",
+  "q": "Tem ranking ou competição?",
+  "k": [
+   "ranking",
+   "competicao",
+   "pontos",
+   "capital",
+   "jogo",
+   "gamificacao",
+   "liga",
+   "squad"
+  ],
+  "a": "<p>Não tem ranking individual. Tem a Liga de Squads, que é cooperativa: o grupo inteiro trabalha junto por uma meta coletiva em cada Sprint.</p><p>Os pontos se chamam Capital e medem constância, não fluência. Veja em <a href=\"{{root}}como-e-estudar/\">Como é estudar</a>.</p>",
+  "next": [
+   "faltar",
+   "empresa"
+  ]
+ },
+ {
+  "id": "certificado",
+  "q": "Tem certificado?",
+  "k": [
+   "certificado",
+   "certificacao",
+   "diploma",
+   "oficial",
+   "comprovante",
+   "reconhecido"
+  ],
+  "a": "<p>Tem. Ao concluir cada nível, você recebe o certificado da SPLA com o seu nível equivalente no CEFR, por exemplo “nível equivalente B2 (CEFR)”.</p><p>Se você precisa de uma prova internacional específica, conta pra gente e montamos o plano juntos.</p>",
+  "next": [
+   "zero",
+   "garantia"
+  ]
+ },
+ {
+  "id": "empresa",
+  "chip": true,
+  "q": "Minha empresa pode contratar?",
+  "k": [
+   "empresa",
+   "rh",
+   "corporativo",
+   "time",
+   "equipe",
+   "colaboradores",
+   "b2b",
+   "contratar"
+  ],
+  "a": "<p>Pode. Cada área treina com as cenas do próprio trabalho, os departamentos viram squads na Liga e o RH acompanha a adesão e a evolução.</p><p>Os detalhes estão em <a href=\"{{root}}empresas/\">Para empresas</a>. Uma conversa de 20 minutos já mostra uma sessão rodando.</p>",
+  "next": [
+   "privacidade",
+   "sap"
+  ]
+ },
+ {
+  "id": "privacidade",
+  "q": "A empresa vê minhas conversas?",
+  "k": [
+   "privacidade",
+   "dados",
+   "conversas",
+   "audio",
+   "gravacao",
+   "transcricao",
+   "lgpd",
+   "ver",
+   "gestor"
+  ],
+  "a": "<p>Áudio e transcrições das suas conversas são sempre privados.</p><p>O que o RH pode ver depende de quem paga. Se a empresa paga tudo, ela vê dados de uso e evolução, e você sabe disso desde o início. Se há coparticipação, só com a sua autorização. Se você paga, você decide se compartilha o seu Boletim.</p>",
+  "next": [
+   "empresa"
+  ]
+ },
+ {
+  "id": "sap",
+  "q": "É só para quem trabalha com SAP?",
+  "k": [
+   "sap",
+   "erp",
+   "cloud",
+   "ti",
+   "tecnologia",
+   "oracle",
+   "totvs",
+   "salesforce",
+   "aws",
+   "area",
+   "setor",
+   "setores",
+   "trilha",
+   "trilhas"
+  ],
+  "a": "<p>Não. A trilha “Inglês para SAP, ERP e Cloud” é o nosso carro-chefe em TI, mas há trilhas para Serviços e Corporativo, Industrial e Operações, Comércio e Varejo, e Saúde e Educação.</p><p>Veja todas em <a href=\"{{root}}trilhas/\">Trilhas</a>.</p>",
+  "next": [
+   "zero",
+   "empresa"
+  ]
+ },
+ {
+  "id": "quando",
+  "q": "Quando posso começar?",
+  "k": [
+   "quando",
+   "comecar",
+   "inicio",
+   "matricula",
+   "turma",
+   "turmas",
+   "lancamento",
+   "app",
+   "aplicativo",
+   "celular"
+  ],
+  "a": "<p>As primeiras turmas estão previstas para 2027, e o app para iPhone e Android também.</p><p>Deixe seu contato pelo <a href=\"{{root}}contato/#diagnostico\">diagnóstico rápido</a> e a gente te avisa assim que abrir a sua turma.</p>",
+  "next": [
+   "preco",
+   "idiomas"
+  ]
+ },
+ {
+  "id": "idiomas",
+  "q": "Vocês ensinam outros idiomas?",
+  "k": [
+   "idiomas",
+   "espanhol",
+   "frances",
+   "alemao",
+   "italiano",
+   "mandarim",
+   "outros",
+   "linguas",
+   "languages"
+  ],
+  "a": "<p>Começamos pelo inglês. Por isso o nome é São Paulo <em>Languages</em> Academy: outros idiomas vêm em seguida, com o mesmo método.</p>",
+  "next": [
+   "quando"
+  ]
+ }
+]

@@ -1,0 +1,8 @@
+[
+ {"tag":"SAP","area":"TI · SAP/ERP/Cloud","pt":"Atualize o time global: o go-live continua no prazo.","en":"We're on track for go-live next Friday.","keys":["track","go-live"],"hint":"<em>on track</em> = no prazo, dentro do planejado."},
+ {"tag":"Finanças","area":"Finanças","pt":"Explique para o investidor por que a margem subiu no trimestre.","en":"Our margin went up because costs came down.","keys":["margin","costs"],"hint":"<em>went up / came down</em>: o par mais útil para falar de números."},
+ {"tag":"Entrevista","area":"Carreira","pt":"O recrutador pediu: fale de um projeto do qual você se orgulha.","en":"I led a team of five through a tough rollout.","keys":["led","rollout"],"hint":"<em>led</em> (passado de <em>lead</em>): verbo forte para entrevista."},
+ {"tag":"Indústria","area":"Industrial · Operações","pt":"Avise o fornecedor de que a entrega atrasou dois dias.","en":"The shipment is running two days behind.","keys":["shipment","behind"],"hint":"<em>running behind</em> soa natural e educado para atrasos."},
+ {"tag":"Varejo","area":"Comércio · Varejo","pt":"Atenda um turista que procura outro tamanho.","en":"Let me check if we have it in a medium.","keys":["check","medium"],"hint":"<em>Let me check</em> compra tempo com gentileza."},
+ {"tag":"Saúde","area":"Saúde · Educação","pt":"Pergunte ao paciente estrangeiro onde dói.","en":"Can you show me where it hurts?","keys":["show","hurts"],"hint":"<em>hurts</em>, com o “h” soprado: um som que costuma confundir brasileiros."}
+]
