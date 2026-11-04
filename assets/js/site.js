@@ -263,7 +263,7 @@ $$('[data-carousel]').forEach(car => {
   const every = +car.dataset.autoplay || 0;
   let userPaused = reduced(), hover = false, focus = false, vis = false, holdUntil = 0, timer = 0;
   track.dataset.cursorLabel = 'Arraste';
-  items.forEach((it, i) => it.setAttribute('aria-label', `${i + 1} de ${items.length}`));
+  items.forEach((it, i) => { if (it.tagName !== 'A') it.setAttribute('aria-label', `${i + 1} de ${items.length}`); });
   const off = i => items[i].offsetLeft - items[0].offsetLeft;
   const idx = () => { const x = track.scrollLeft; let best = 0, bd = 1e9; items.forEach((it, i) => { const dd = Math.abs(off(i) - x); if (dd < bd) { bd = dd; best = i; } }); return best; };
   const atEnd = () => track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
