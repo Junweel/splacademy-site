@@ -599,6 +599,15 @@ if (fab && panel && FAQ.length) {
     else fab.focus();
   };
   fab.addEventListener('click', () => open(true));
+  /* esconde o botão enquanto o hero da home está na tela (não cobre chips nem a tela de chamada) */
+  const hero = $('.hero');
+  if (hero) {
+    let ticking = false;
+    const sync = () => { ticking = false; const r = hero.getBoundingClientRect(); fab.classList.toggle('is-away', r.bottom > innerHeight * 0.3 && !panel.classList.contains('is-open')); };
+    addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(sync); } }, { passive: true });
+    addEventListener('resize', sync, { passive: true });
+    sync();
+  }
   $('.sp__close', panel).addEventListener('click', () => open(false));
   d.addEventListener('keydown', e => { if (e.key === 'Escape' && panel.classList.contains('is-open')) open(false); });
   form.addEventListener('submit', e => {
