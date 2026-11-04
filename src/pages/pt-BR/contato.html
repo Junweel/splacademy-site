@@ -1,8 +1,8 @@
 <!--meta {"title":"Contato e perguntas frequentes","description":"Fale com a SPLA por WhatsApp ou e-mail, faça o diagnóstico rápido e veja as perguntas frequentes. Ou pergunte à Sophia."} -->
-<header class="phead">
+<header class="phead spot" data-spot>
   <div class="wrap">
     <p class="eyebrow">Contato</p>
-    <h1>Bora conversar? <span class="mark">Tamo junto.</span></h1>
+    <h1 class="kinetic" data-kinetic>Bora conversar? <span class="mark">Tamo junto.</span></h1>
     <p class="lead">Responda o diagnóstico rápido para a gente indicar a sua trilha, ou chame direto no WhatsApp ou no e-mail.</p>
     <ul class="contact-list">
       <li><a href="{{wa}}?text=Oi%2C%20SPLA!%20Quero%20come%C3%A7ar." target="_blank" rel="noopener">{{icon:wa}}<span><b>WhatsApp</b>+55 11 9 8178-3554</span></a></li>
@@ -15,6 +15,7 @@
   <div class="wrap">
     <div class="sec__head reveal"><p class="eyebrow">Diagnóstico rápido</p><h2>Quatro perguntas, menos de um minuto</h2><p class="lead">Nada é enviado automaticamente. No fim, você escolhe mandar a mensagem pronta pelo WhatsApp ou pelo e-mail.</p></div>
     <form class="diag card" data-diag onsubmit="return false">
+      <p class="small muted" aria-live="polite"><span data-diag-count>0/4</span> respondidas</p><div class="diag__meter" aria-hidden="true"><i></i></div>
       <fieldset><legend>1. Você é…</legend><div class="opts"><label><input type="radio" name="quem" value="profissional"><span>profissional</span></label><label><input type="radio" name="quem" value="estudante"><span>estudante</span></label><label><input type="radio" name="quem" value="empresa ou RH"><span>empresa ou RH</span></label></div></fieldset><fieldset><legend>2. Sua área</legend><div class="opts"><label><input type="radio" name="area" value="TI · SAP/ERP/Cloud"><span>TI · SAP/ERP/Cloud</span></label><label><input type="radio" name="area" value="Serviços e Corporativo"><span>Serviços e Corporativo</span></label><label><input type="radio" name="area" value="Industrial e Operações"><span>Industrial e Operações</span></label><label><input type="radio" name="area" value="Comércio e Varejo"><span>Comércio e Varejo</span></label><label><input type="radio" name="area" value="Saúde e Educação"><span>Saúde e Educação</span></label><label><input type="radio" name="area" value="outra"><span>outra</span></label></div></fieldset><fieldset><legend>3. Seu objetivo principal</legend><div class="opts"><label><input type="radio" name="meta" value="reuniões e calls"><span>reuniões e calls</span></label><label><input type="radio" name="meta" value="entrevista de emprego"><span>entrevista de emprego</span></label><label><input type="radio" name="meta" value="apresentações"><span>apresentações</span></label><label><input type="radio" name="meta" value="viagem"><span>viagem</span></label><label><input type="radio" name="meta" value="prova internacional"><span>prova internacional</span></label><label><input type="radio" name="meta" value="treinar meu time"><span>treinar meu time</span></label></div></fieldset><fieldset><legend>4. Seu inglês hoje</legend><div class="opts"><label><input type="radio" name="nivel" value="começando do zero"><span>começando do zero</span></label><label><input type="radio" name="nivel" value="básico"><span>básico</span></label><label><input type="radio" name="nivel" value="intermediário"><span>intermediário</span></label><label><input type="radio" name="nivel" value="avançado"><span>avançado</span></label><label><input type="radio" name="nivel" value="não sei"><span>não sei</span></label></div></fieldset>
       <div class="diag__out" data-diag-out hidden>
         <p class="small muted">Sua mensagem:</p>

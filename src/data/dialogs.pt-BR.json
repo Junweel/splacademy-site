@@ -1,0 +1,8 @@
+[
+ {"tag":"Daily · SAP","sophia":"What does your manager think of the new dashboard?","you":"She like the real-time view a lot.","wrong":"like","right":"likes","reply":"Nice! She likes it. Ready for your status update?","tip":"<b>she likes</b>: com he, she e it, o verbo ganha <b>-s</b>."},
+ {"tag":"Go-live · ERP","sophia":"Quick status for the global team?","you":"We is on track for go-live next Friday.","wrong":"is","right":"are","reply":"Perfect. “We're on track” sounds very natural.","tip":"<b>on track</b> = no prazo, dentro do planejado."},
+ {"tag":"Finanças","sophia":"Why did the margin go up this quarter?","you":"Our margin went up because cost came down.","wrong":"cost","right":"costs","reply":"Great answer. Clear and short.","tip":"<b>went up / came down</b>: o par mais útil para falar de números."},
+ {"tag":"Entrevista","sophia":"Tell me about a project you're proud of.","you":"I leaded a team of five through a tough rollout.","wrong":"leaded","right":"led","reply":"Strong start! Now tell me the result.","tip":"<b>led</b> é o passado de <b>lead</b>. Verbo forte para entrevista."},
+ {"tag":"Varejo","sophia":"Excuse me, do you have this in a medium?","you":"Let me check if we have it in medium.","wrong":"in","right":"in a","reply":"Lovely. Polite and natural.","tip":"<b>Let me check</b> compra tempo com gentileza."},
+ {"tag":"Saúde","sophia":"I'm not feeling well. My arm hurts.","you":"Can you show me where it hurt?","wrong":"hurt","right":"hurts","reply":"Well done. And remember the “h” sound.","tip":"<b>hurts</b>, com o “h” soprado: um som que costuma confundir brasileiros."}
+]

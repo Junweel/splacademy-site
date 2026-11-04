@@ -1,8 +1,8 @@
 <!--meta {"title":"Como é estudar na SPLA · Sprints, squads e Capital","description":"Sessões de 20 a 30 minutos, Sprints de 4 semanas, Liga de Squads cooperativa e Capital, os pontos que medem constância. Errar nunca tira ponto."} -->
-<header class="phead">
+<header class="phead spot" data-spot>
   <div class="wrap">
     <p class="eyebrow">Como é estudar</p>
-    <h1>Rotina de projeto, <span class="mark">ritmo de jogo</span></h1>
+    <h1 class="kinetic" data-kinetic>Rotina de projeto, <span class="mark">ritmo de jogo</span></h1>
     <p class="lead">A SPLA usa a linguagem que você já conhece do trabalho, como daily, sprint e deliverables, para organizar seus estudos. É leve, cooperativo e não pune ninguém.</p>
   </div>
 </header>
@@ -54,10 +54,22 @@
 <section class="sec sec--branco">
   <div class="wrap">
     <div class="sec__head reveal"><p class="eyebrow">Quem faz o quê</p><h2>Seus três parceiros de estudo</h2></div>
-    <div class="grid grid--3">
-      <article class="card reveal" data-hover><div class="portal portal--y" data-rig="sophia"><img src="{{root}}assets/img/sophia-480.webp" alt="Ilustração da Sophia, tutora de IA" width="480" height="480" loading="lazy"></div><span class="ai-tag">Inteligência artificial</span><h3>Sophia</h3><p class="muted">Conversa por voz, dicas e Change Requests.</p></article>
-      <article class="card reveal" data-hover><div class="portal" data-rig="erick"><img src="{{root}}assets/img/erick-480.webp" alt="Ilustração do Erick" width="480" height="480" loading="lazy"></div><h3>Erick</h3><p class="muted">Aquecimento, revisão, pronúncia e o ritmo do squad.</p></article>
-      <article class="card reveal" data-hover><div class="portal portal--r" data-rig="lili" data-rest="smile_closed"><img src="{{root}}assets/img/lili-480.webp" alt="Ilustração da Teacher Lili" width="480" height="480" loading="lazy"></div><h3>Teacher Lili</h3><p class="muted">Feedback honesto, checkpoints e o Boletim.</p></article>
+    <div class="car" data-carousel data-autoplay="5200" aria-roledescription="carrossel" aria-label="Sophia, Erick e Teacher Lili">
+      <div class="car__track" tabindex="0">
+        <article class="who-card" data-tilt data-tilt-max="4" aria-roledescription="slide">
+          <div class="who-card__media">{{pic:sophia|Sophia, tutora de IA da SPLA, personagem 3D de cabelos castanhos e blazer azul-marinho}}<video muted playsinline loop preload="none" data-lazy-video="sophia-speak2" data-hover-video tabindex="-1" aria-hidden="true"></video></div>
+          <div class="who-card__body"><span class="ai-tag">Inteligência artificial</span><h3>Sophia</h3><span class="role">Tutora de conversação</span><p>Conversa por voz, dicas e Change Requests.</p></div>
+        </article>
+        <article class="who-card" data-tilt data-tilt-max="4" aria-roledescription="slide">
+          <div class="who-card__media">{{pic:erick|Erick, personagem 3D de cabelo cacheado, fone no pescoço e microfone de podcast}}</div>
+          <div class="who-card__body"><h3>Erick</h3><span class="role">Colega de squad e dos exercícios</span><p>Aquecimento, revisão, pronúncia e o ritmo do squad.</p></div>
+        </article>
+        <article class="who-card" data-tilt data-tilt-max="4" aria-roledescription="slide">
+          <div class="who-card__media">{{pic:lili|Teacher Lili, personagem 3D loira de óculos vermelhos no cabelo e blazer preto}}</div>
+          <div class="who-card__body"><h3>Teacher Lili</h3><span class="role">Avaliação e feedback</span><p>Feedback honesto, checkpoints e o Boletim.</p></div>
+        </article>
+      </div>
+      <div class="car__ui"><span class="car__count" data-car-count aria-hidden="true">01/03</span><div class="car__bar" aria-hidden="true"><i></i></div><button class="iconbtn" type="button" data-car-prev aria-label="Anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="iconbtn" type="button" data-car-next aria-label="Próximo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="iconbtn" type="button" data-car-pause aria-pressed="false" aria-label="Pausar carrossel"></button></div>
     </div>
   </div>
 </section>

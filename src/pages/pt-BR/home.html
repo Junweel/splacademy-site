@@ -1,12 +1,13 @@
-<!--meta {"title":"SPLA · Inglês para SAP, ERP, Cloud e o mundo corporativo","description":"Escola de idiomas nascida em São Paulo. Você treina o inglês das cenas reais do seu trabalho, conversando por voz com a Sophia, tutora de IA, e sai falando. Do zero ao C1, seguindo os níveis do CEFR.","scenes":true,"priority":"1.0"} -->
-<section class="hero">
+<!--meta {"title":"SPLA · Inglês para SAP, ERP, Cloud e o mundo corporativo","description":"Escola de idiomas nascida em São Paulo. Você treina o inglês das cenas reais do seu trabalho, conversando por voz com a Sophia, tutora de IA, e sai falando. Do zero ao C1, seguindo os níveis do CEFR.","dialogs":true,"priority":"1.0","head":"<link rel=\"preload\" as=\"image\" href=\"assets/img/v1/sophia-call-poster.avif\" type=\"image/avif\" fetchpriority=\"high\">"} -->
+<section class="hero spot" data-spot>
+  <canvas class="hero__field" data-field aria-hidden="true"></canvas>
   <div class="wrap hero__grid">
-    <div>
+    <div class="hero__copy">
       <p class="eyebrow eyebrow--red">São Paulo Languages Academy</p>
-      <h1>Inglês para SAP, ERP, Cloud e o <span class="mark">mundo corporativo</span></h1>
+      <h1 class="kinetic" data-kinetic>Inglês para SAP, ERP, Cloud e o <span class="mark">mundo corporativo</span></h1>
       <p class="lead">Você treina o inglês das cenas reais do seu trabalho, como a daily com o time global, a call com o cliente e a entrevista para a vaga que você quer. Conversa por voz com a Sophia, nossa tutora de IA, todo dia, em 20 a 30 minutos. E sai falando.</p>
       <div class="btns">
-        <a class="btn" href="{{root}}contato/#diagnostico">Quero começar</a>
+        <a class="btn btn--big" data-magnetic href="{{root}}contato/#diagnostico">Quero começar <span class="btn__arrow" aria-hidden="true">→</span></a>
         <a class="link-arrow" href="{{root}}como-e-estudar/">Ver como é uma sessão</a>
       </div>
       <ul class="chips" aria-label="Destaques">
@@ -16,122 +17,218 @@
       </ul>
     </div>
 
-    <div class="stage reveal" data-stage data-hover>
-      <p class="sr-only">Demonstração animada: a Sophia mostra, em balões de fala, uma situação de trabalho em português e a frase em inglês para resolvê-la, com uma dica no final. As cenas passam por TI, finanças, entrevista, indústria, varejo e saúde.</p>
-      <div aria-hidden="true">
-        <div class="stage__bar"><span class="rec">Ao vivo com a Sophia</span><span class="stage__tag" data-tag>TI · SAP/ERP/Cloud</span></div>
-        <div class="stage__who">
-          <div class="portal portal--y" data-rig="sophia"><img src="{{root}}assets/img/sophia-480.webp" alt="" width="480" height="480" fetchpriority="high"></div>
-          <div class="stage__name">Sophia<small>tutora de IA · conversa por voz</small></div>
+    <div class="call" data-call>
+      <p class="sr-only">Demonstração animada de uma chamada de voz no app: a Sophia, tutora de IA, faz uma pergunta em inglês, a legenda mostra a resposta do aluno palavra por palavra, destaca a correção do foco do dia (por exemplo, “like” vira “likes”) e termina com uma dica em português. As cenas passam por daily de SAP, go-live, finanças, entrevista, varejo e saúde.</p>
+      <div class="call__phone" data-tilt data-tilt-max="5" aria-hidden="true">
+        <div class="call__media">
+          <picture><source type="image/avif" srcset="{{root}}assets/img/v1/sophia-call-poster.avif"><img src="{{root}}assets/img/v1/sophia-call-poster.webp" width="432" height="768" alt="" fetchpriority="high" decoding="async"></picture>
+          <video class="call__vid" muted playsinline preload="none" tabindex="-1"></video>
+          <video class="call__vid" muted playsinline preload="none" tabindex="-1"></video>
         </div>
-        <div class="balloons">
-          <div class="bal bal--pt"><span class="bal__label">A situação</span><span data-pt>Atualize o time global: o go-live continua no prazo.</span></div>
-          <div class="bal bal--en"><span class="bal__label">Em inglês</span><span data-en><span class="w on">We're</span> <span class="w on key">on</span> <span class="w on key">track</span> <span class="w on">for</span> <span class="w on key">go-live</span> <span class="w on">next</span> <span class="w on">Friday.</span></span></div>
-          <div class="hint on" data-hint><b>Dica da Sophia:</b> <span><em>on track</em> = no prazo, dentro do planejado.</span></div>
+        <div class="call__top"><span class="call__live">AO VIVO</span><span class="call__name">Sophia<small>tutora de IA</small></span><span class="call__time" data-call-time>00:00</span></div>
+        <span class="call__tag" data-call-tag>Daily · SAP</span>
+        <div class="call__subs" data-call-subs>
+          <p class="sub"><b class="who">Sophia</b>What does your manager think of the new dashboard?</p>
+          <p class="sub sub--you"><b class="who">Você</b>She <s>like</s> <ins>likes</ins> the real-time view a lot.</p>
+        </div>
+        <canvas class="call__wave" data-call-wave width="352" height="36"></canvas>
+        <span class="call__hold">segure para falar</span>
+        <div class="call__bar">
+          <i><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></i>
+          <i><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m16 10 5-3v10l-5-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></i>
+          <i><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></i>
+          <i><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="19" cy="12" r="1.8" fill="currentColor"/></svg></i>
+          <i class="end"><svg viewBox="0 0 24 24"><path d="M3 14c5-5 13-5 18 0l-2.5 2.5-3.5-2v-2.6a12 12 0 0 0-6 0v2.6l-3.5 2Z" fill="currentColor"/></svg></i>
         </div>
       </div>
-      <div class="stage__ctrl">
-        <div class="dots" role="group" aria-label="Escolher cena"></div>
-        <button class="iconbtn" type="button" data-pause aria-pressed="false" aria-label="Pausar animação"></button>
+      <div class="float float--a" data-depth="18" aria-hidden="true"><i>✓</i>Correção em tempo real</div>
+      <div class="float float--b" data-depth="-24" aria-hidden="true"><i>?</i>Dica antes da resposta</div>
+      <div class="float float--c" data-depth="12" aria-hidden="true"><i>AI</i>Conversa por voz</div>
+      <div class="call__ctrl">
+        <div class="dots" role="group" aria-label="Escolher cena da demonstração" data-call-dots></div>
+        <button class="iconbtn" type="button" data-call-pause aria-pressed="false" aria-label="Pausar demonstração"></button>
       </div>
     </div>
+  </div>
+</section>
+
+<div class="marquee" aria-hidden="true" data-marquee>
+  <div class="marquee__track">
+    <span>on track <em>no prazo</em></span><span>go-live <em>entrada em produção</em></span><span>cutover <em>a virada</em></span><span>follow up <em>retomar</em></span><span>blocker <em>impedimento</em></span><span>running behind <em>atrasado</em></span><span>let me check <em>deixa eu ver</em></span><span>hypercare <em>suporte intensivo</em></span>
+    <span>on track <em>no prazo</em></span><span>go-live <em>entrada em produção</em></span><span>cutover <em>a virada</em></span><span>follow up <em>retomar</em></span><span>blocker <em>impedimento</em></span><span>running behind <em>atrasado</em></span><span>let me check <em>deixa eu ver</em></span><span>hypercare <em>suporte intensivo</em></span>
+  </div>
+</div>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec__head sec__head--row">
+      <div class="reveal">
+        <p class="eyebrow">O que você ganha</p>
+        <h2 class="kinetic" data-kinetic>O inglês que destrava a sua <span class="mark">próxima oportunidade</span></h2>
+      </div>
+      <p class="lead reveal" style="max-width:30em">Seja uma entrevista, uma reunião com o time de fora, uma apresentação, um treinamento ou uma viagem. Você treina a frase de que vai precisar, na cena em que vai usar.</p>
+    </div>
+    <div class="bento">
+      <article class="tile tile--media reveal" data-tilt data-tilt-max="3">
+        <div class="tile__bg" aria-hidden="true">
+          <picture><source type="image/avif" srcset="{{root}}assets/img/v1/sophia-720.avif"><img src="{{root}}assets/img/v1/sophia-720.webp" width="720" height="960" alt="" loading="lazy" decoding="async"></picture>
+          <video muted playsinline loop preload="none" data-lazy-video="sophia-speak2" tabindex="-1"></video>
+        </div>
+        <span class="num">01</span>
+        <h3>Fala antes de tudo</h3>
+        <p>Toda sessão termina com você falando numa situação real, por voz. A gramática entra curta e na hora certa, a serviço da conversa.</p>
+      </article>
+      <article class="tile tile--stat tile--y reveal"><b data-count="80" data-suffix="+">80+</b><span>métodos de ensino com evidência publicada, integrados ao método</span></article>
+      <article class="tile tile--stat reveal"><b data-count="48">48</b><span>pesquisadores cujos estudos fundamentam o método</span></article>
+      <article class="tile tile--wide reveal">
+        <span class="num">02</span>
+        <div class="tile__chips" aria-hidden="true"><span>TI</span><span>Finanças</span><span>RH</span><span>Engenharia</span><span>Logística</span><span>Varejo</span><span>Saúde</span></div>
+        <h3>O inglês da sua área</h3>
+        <p>TI, finanças, RH, engenharia, logística, varejo, saúde. O vocabulário e as cenas mudam conforme o seu trabalho.</p>
+      </article>
+      <article class="tile tile--wide tile--noite reveal">
+        <span class="num">03</span>
+        <div class="backon" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="miss"></i><i class="back"></i><i></i><i></i><i></i></div>
+        <h3>Constância sem culpa</h3>
+        <p>Errar não tira ponto e faltar não gera castigo. Quando a vida aperta, o Back on Track te traz de volta sem perder o progresso.</p>
+      </article>
+      <article class="tile tile--stat reveal"><b>20–30</b><span>minutos por sessão, no celular, no seu ritmo</span></article>
+      <article class="tile tile--stat reveal"><b data-count="4">4</b><span>setores com trilhas pensadas para cada área</span></article>
+    </div>
+    <p class="small muted" style="margin-top:14px">Citar estudos não significa que os pesquisadores endossem a SPLA.</p>
   </div>
 </section>
 
 <section class="sec--tight">
   <div class="wrap">
-    <div class="proof reveal">
-      <div><b>80+</b><span>métodos de ensino com evidência publicada, integrados ao método</span></div>
-      <div><b>48</b><span>pesquisadores cujos estudos fundamentam o método</span></div>
-      <div><b>20–30 min</b><span>por sessão, no celular, no seu ritmo</span></div>
-      <div><b>4 setores</b><span>com trilhas pensadas para cada área</span></div>
+    <div class="lens reveal" data-lens>
+      <p class="lens__hint"><b>●</b><span data-lens-hint>Passe o mouse: o português vira inglês</span></p>
+      <div class="lens__stack">
+        <div class="lens__layer lens__pt"><p>Estamos no prazo para o go-live.</p><p>Deixa eu verificar e te retorno.</p><p>Tenho um impedimento na interface.</p></div>
+        <div class="lens__layer lens__en" aria-hidden="true"><p>We're on track for go-live.</p><p>Let me check and follow up.</p><p>I have one blocker on the interface.</p></div>
+        <span class="lens__ring" aria-hidden="true"></span>
+      </div>
+      <p class="sr-only">Em inglês: We're on track for go-live. Let me check and follow up. I have one blocker on the interface.</p>
+      <div class="lens__foot"><p>É isso que você treina: a frase certa, na cena certa.</p><button class="btn btn--ghost" type="button" data-lens-all aria-pressed="false">Ver tudo em inglês</button></div>
     </div>
-    <p class="small muted" style="margin-top:12px">Citar estudos não significa que os pesquisadores endossem a SPLA.</p>
   </div>
+</section>
+
+<section class="sec sec--creme" style="padding-bottom:0">
+  <div class="hsteps" data-hsteps>
+    <div class="hsteps__viewport">
+      <div class="hsteps__head reveal">
+        <p class="eyebrow">Uma sessão por dia</p>
+        <h2>Seis passos, de 20 a 30 minutos</h2>
+        <p class="lead">Cada etapa tem um motivo, e todos vêm da pesquisa sobre como a gente aprende e lembra.</p>
+      </div>
+      <ol class="hsteps__track" style="list-style:none;margin:0">
+        <li class="step"><span class="step__n" data-n="01" aria-hidden="true"></span><h3>Revisão no momento certo</h3><p>Você retoma o que estava quase esquecendo, puxando da memória em vez de reler.</p><span class="step__who"><img src="{{root}}assets/img/v1/erick-face-96.webp" alt="" width="40" height="40" loading="lazy">Erick</span></li>
+        <li class="step"><span class="step__n" data-n="02" aria-hidden="true"></span><h3>Algo novo da sua área</h3><p>Expressões que andam juntas, do jeito que aparecem no trabalho de verdade.</p><span class="step__who"><img src="{{root}}assets/img/v1/erick-face-96.webp" alt="" width="40" height="40" loading="lazy">Erick</span></li>
+        <li class="step"><span class="step__n" data-n="03" aria-hidden="true"></span><h3>Gramática curta</h3><p>Uma explicação objetiva e prática logo em seguida. Sem decoreba.</p><span class="step__who"><img src="{{root}}assets/img/v1/lili-face-96.webp" alt="" width="40" height="40" loading="lazy">Teacher Lili</span></li>
+        <li class="step"><span class="step__n" data-n="04" aria-hidden="true"></span><h3>Pronúncia que importa</h3><p>Foco nos sons que mais confundem brasileiros, para você ser entendido.</p><span class="step__who"><img src="{{root}}assets/img/v1/erick-face-96.webp" alt="" width="40" height="40" loading="lazy">Erick</span></li>
+        <li class="step step--hot"><span class="step__n" data-n="05" aria-hidden="true"></span><h3>Conversa por voz</h3><p>Uma tarefa real com a Sophia. Ela dá uma dica antes da resposta e corrige só o foco do dia.</p><span class="step__who"><img src="{{root}}assets/img/v1/sophia-face-96.webp" alt="" width="40" height="40" loading="lazy">Sophia · IA</span></li>
+        <li class="step step--y"><span class="step__n" data-n="06" aria-hidden="true"></span><h3>“Eu já consigo…”</h3><p>Você marca o que já consegue fazer em inglês e vê a evolução semana a semana.</p><span class="step__who"><img src="{{root}}assets/img/v1/lili-face-96.webp" alt="" width="40" height="40" loading="lazy">Teacher Lili</span></li>
+      </ol>
+      <p class="hsteps__head" style="margin:22px auto 0"><a class="link-arrow" href="{{root}}metodologia/">Entender a base científica</a></p>
+    </div>
+  </div>
+  <div style="height:clamp(64px,10vw,140px)"></div>
 </section>
 
 <section class="sec">
   <div class="wrap">
-    <div class="sec__head reveal">
-      <p class="eyebrow">O que você ganha</p>
-      <h2>O inglês que destrava a sua próxima oportunidade</h2>
-      <p class="lead">Seja uma entrevista, uma reunião com o time de fora, uma apresentação, um treinamento ou uma viagem. Você treina a frase de que vai precisar, na cena em que vai usar.</p>
+    <div class="sec__head sec__head--row">
+      <div class="reveal">
+        <p class="eyebrow">A turma</p>
+        <h2 class="kinetic" data-kinetic>Quem acompanha <span class="mark">você</span></h2>
+      </div>
+      <p class="lead reveal" style="max-width:26em">Três personagens, três papéis claros. Arraste para conhecer.</p>
     </div>
-    <div class="grid grid--3">
-      <article class="card reveal"><span class="num">01</span><h3>Fala antes de tudo</h3><p class="muted">Toda sessão termina com você falando numa situação real, por voz. A gramática entra curta e na hora certa, a serviço da conversa.</p></article>
-      <article class="card reveal"><span class="num">02</span><h3>O inglês da sua área</h3><p class="muted">TI, finanças, RH, engenharia, logística, varejo, saúde. O vocabulário e as cenas mudam conforme o seu trabalho.</p></article>
-      <article class="card reveal"><span class="num">03</span><h3>Constância sem culpa</h3><p class="muted">Errar não tira ponto e faltar não gera castigo. Quando a vida aperta, o Back on Track te traz de volta sem perder o progresso.</p></article>
-    </div>
-  </div>
-</section>
-
-<div class="faixa" aria-hidden="true"></div>
-
-<section class="sec sec--creme">
-  <div class="wrap">
-    <div class="sec__head reveal">
-      <p class="eyebrow">Uma sessão por dia</p>
-      <h2>Seis passos, de 20 a 30 minutos</h2>
-      <p class="lead">Cada etapa tem um motivo, e todos vêm da pesquisa sobre como a gente aprende e lembra.</p>
-    </div>
-    <ol class="steps">
-      <li class="reveal"><div><span class="who">Erick</span><h3>Revisão no momento certo</h3><p>Você retoma o que estava quase esquecendo, puxando da memória em vez de reler.</p></div></li>
-      <li class="reveal"><div><span class="who">Erick</span><h3>Algo novo da sua área</h3><p>Expressões que andam juntas, do jeito que aparecem no trabalho de verdade.</p></div></li>
-      <li class="reveal"><div><span class="who">Teacher Lili</span><h3>Gramática curta</h3><p>Uma explicação objetiva e prática logo em seguida. Sem decoreba.</p></div></li>
-      <li class="reveal"><div><span class="who">Erick</span><h3>Pronúncia que importa</h3><p>Foco nos sons que mais confundem brasileiros, para você ser entendido.</p></div></li>
-      <li class="reveal"><div><span class="who">Sophia</span><h3>Conversa por voz</h3><p>Uma tarefa real com a Sophia. Ela dá uma dica antes da resposta e corrige só o foco do dia.</p></div></li>
-      <li class="reveal"><div><span class="who">Teacher Lili</span><h3>“Eu já consigo…”</h3><p>Você marca o que já consegue fazer em inglês e vê a evolução semana a semana.</p></div></li>
-    </ol>
-    <p style="margin-top:24px"><a class="link-arrow" href="{{root}}metodologia/">Entender a base científica</a></p>
-  </div>
-</section>
-
-<section class="sec">
-  <div class="wrap">
-    <div class="sec__head reveal">
-      <p class="eyebrow">A turma</p>
-      <h2>Quem acompanha você</h2>
-      <p class="lead">Três personagens, três papéis claros. Passe o mouse e diga oi.</p>
-    </div>
-    <div class="cast">
-      <article class="card reveal" data-hover>
-        <div class="portal portal--y" data-rig="sophia"><img src="{{root}}assets/img/sophia-480.webp" alt="Ilustração da Sophia, tutora de IA, com headset" width="480" height="480" loading="lazy"></div>
-        <span class="ai-tag">Inteligência artificial</span>
-        <h3>Sophia</h3>
-        <span class="role">Tutora de conversação</span>
-        <p class="muted">Conversa com você por voz nas cenas do seu trabalho. Dá uma dica antes de entregar a resposta e corrige só o que é foco do dia, para você não travar.</p>
-      </article>
-      <article class="card reveal" data-hover>
-        <div class="portal" data-rig="erick"><img src="{{root}}assets/img/erick-480.webp" alt="Ilustração do Erick, colega de estudos" width="480" height="480" loading="lazy"></div>
-        <h3>Erick</h3>
-        <span class="role">Colega de squad e dos exercícios</span>
-        <p class="muted">Puxa o aquecimento, a revisão e a pronúncia. Pratica junto com você e lembra o combinado da semana.</p>
-      </article>
-      <article class="card reveal" data-hover>
-        <div class="portal portal--r" data-rig="lili" data-rest="smile_closed"><img src="{{root}}assets/img/lili-480.webp" alt="Ilustração da Teacher Lili, de óculos no cabelo" width="480" height="480" loading="lazy"></div>
-        <h3>Teacher Lili</h3>
-        <span class="role">Avaliação e feedback</span>
-        <p class="muted">Fecha cada sessão com um retorno honesto, conduz o checkpoint da semana e mostra o que melhorou e o que vem a seguir.</p>
-      </article>
+    <div class="car" data-carousel data-autoplay="4800" aria-roledescription="carrossel" aria-label="Personagens da SPLA">
+      <div class="car__track" tabindex="0">
+        <article class="who-card" data-tilt data-tilt-max="4" aria-roledescription="slide">
+          <div class="who-card__media">{{pic:sophia|Sophia, tutora de IA da SPLA, personagem 3D de cabelos castanhos e blazer azul-marinho}}<video muted playsinline loop preload="none" data-lazy-video="sophia-happy" data-hover-video tabindex="-1" aria-hidden="true"></video></div>
+          <span class="ai-tag">Inteligência artificial</span>
+          <div class="who-card__body"><h3>Sophia</h3><span class="role">Tutora de conversação</span><p>Conversa com você por voz nas cenas do seu trabalho. Dá uma dica antes de entregar a resposta e corrige só o que é foco do dia, para você não travar.</p></div>
+        </article>
+        <article class="who-card" data-tilt data-tilt-max="4" aria-roledescription="slide">
+          <div class="who-card__media">{{pic:erick|Erick, personagem 3D de cabelo cacheado, fone no pescoço e microfone de podcast, com a cidade à noite na janela}}</div>
+          <div class="who-card__body"><h3>Erick</h3><span class="role">Colega de squad e dos exercícios</span><p>Puxa o aquecimento, a revisão e a pronúncia. Pratica junto com você e lembra o combinado da semana.</p></div>
+        </article>
+        <article class="who-card" data-tilt data-tilt-max="4" aria-roledescription="slide">
+          <div class="who-card__media">{{pic:lili|Teacher Lili, personagem 3D loira de óculos vermelhos no cabelo e blazer preto, na mesa com livros}}</div>
+          <div class="who-card__body"><h3>Teacher Lili</h3><span class="role">Avaliação e feedback</span><p>Fecha cada sessão com um retorno honesto, conduz o checkpoint da semana e mostra o que melhorou e o que vem a seguir.</p></div>
+        </article>
+        <article class="who-card who-card--squad" aria-roledescription="slide">
+          <div><span class="badge">Liga de Squads</span></div>
+          <div>
+            <div class="squad-faces" aria-hidden="true"><span style="background:#F5C518">A</span><span style="background:#F9E3E3">B</span><span style="background:#F3EBDD">C</span><span style="background:#DDF3E8">+</span></div>
+            <h3>E o seu squad</h3>
+            <p>Seu departamento, sua turma ou um grupo de amigos, com uma meta coletiva por Sprint. Ninguém ganha sozinho. E ninguém perde sozinho.</p>
+            <p style="margin-top:14px"><a class="link-arrow" style="color:var(--amarelo)" href="{{root}}como-e-estudar/">Como é estudar</a></p>
+          </div>
+        </article>
+      </div>
+      <div class="car__ui"><span class="car__count" data-car-count aria-hidden="true">01/04</span><div class="car__bar" aria-hidden="true"><i></i></div><button class="iconbtn" type="button" data-car-prev aria-label="Anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="iconbtn" type="button" data-car-next aria-label="Próximo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="iconbtn" type="button" data-car-pause aria-pressed="false" aria-label="Pausar carrossel"></button></div>
     </div>
   </div>
 </section>
 
 <section class="sec sec--branco">
   <div class="wrap">
-    <div class="split">
+    <div class="sec__head sec__head--row">
       <div class="reveal">
         <p class="eyebrow">Trilhas por setor</p>
-        <h2>Do SAP ao chão de fábrica, da sala de reunião à loja</h2>
-        <p class="lead">O carro-chefe é a trilha <strong>Inglês para SAP, ERP e Cloud</strong>. Ao lado dela, trilhas para os quatro grandes setores do mercado.</p>
-        <p><a class="btn btn--ghost" href="{{root}}trilhas/">Ver as trilhas</a></p>
+        <h2 class="kinetic" data-kinetic>Do SAP ao chão de fábrica, da sala de reunião <span class="mark">à loja</span></h2>
       </div>
-      <div class="grid grid--2">
-        <div class="card card--y flag reveal"><span class="badge">Carro-chefe</span><h3 style="margin-top:12px">SAP, ERP e Cloud</h3><p class="muted">Daily com time global, cutover, go-live, chamados com fornecedores de nuvem.</p></div>
-        <div class="card card--papel reveal"><h3>Serviços e Corporativo</h3><p class="muted">TI, RH/DP, finanças e comercial.</p></div>
-        <div class="card card--papel reveal"><h3>Industrial e Operações</h3><p class="muted">Engenharia, logística e supply chain.</p></div>
-        <div class="card card--papel reveal"><h3>Comércio, Varejo, Saúde e Educação</h3><p class="muted">Atendimento, marketing, pacientes, alunos e congressos.</p></div>
+      <div class="reveal" style="max-width:28em"><p class="lead">O carro-chefe é a trilha <strong>Inglês para SAP, ERP e Cloud</strong>. Ao lado dela, trilhas para os quatro grandes setores do mercado.</p><p><a class="btn btn--ghost" data-magnetic href="{{root}}trilhas/">Ver as trilhas</a></p></div>
+    </div>
+    <div class="car" data-carousel data-autoplay="4200" aria-roledescription="carrossel" aria-label="Trilhas por setor">
+      <div class="car__track" tabindex="0">
+        <a class="sector-card sector-card--y" href="{{root}}trilhas/#sap" data-tilt data-tilt-max="4" style="text-decoration:none" aria-roledescription="slide">
+          <span class="big" data-n="01" aria-hidden="true"></span><span class="badge">Carro-chefe</span><h3 style="margin-top:12px">SAP, ERP e Cloud</h3><p class="muted">Daily com time global, cutover, go-live, chamados com fornecedores de nuvem.</p>
+          <ul><li><q>We're on track, but there's one risk I'd like to flag.</q><small>Reportar risco sem alarmar</small></li><li><q>The job fails after the last transport. Logs attached.</q><small>Chamado com fornecedor de nuvem</small></li></ul>
+        </a>
+        <a class="sector-card" href="{{root}}trilhas/#servicos" data-tilt data-tilt-max="4" style="text-decoration:none" aria-roledescription="slide">
+          <span class="big" data-n="02" aria-hidden="true"></span><h3>Serviços e Corporativo</h3><p class="muted">TI, RH/DP, finanças e comercial.</p>
+          <ul><li><q>Revenue grew, but margins came down.</q><small>Call com investidor</small></li><li><q>Let me recap what we agreed today.</q><small>Reunião com cliente estrangeiro</small></li></ul>
+        </a>
+        <a class="sector-card" href="{{root}}trilhas/#industrial" data-tilt data-tilt-max="4" style="text-decoration:none" aria-roledescription="slide">
+          <span class="big" data-n="03" aria-hidden="true"></span><h3>Industrial e Operações</h3><p class="muted">Engenharia, logística e supply chain.</p>
+          <ul><li><q>The shipment is running two days behind.</q><small>Atraso de entrega</small></li><li><q>Please wear your hard hat in this area.</q><small>Visita técnica na planta</small></li></ul>
+        </a>
+        <a class="sector-card" href="{{root}}trilhas/#varejo" data-tilt data-tilt-max="4" style="text-decoration:none" aria-roledescription="slide">
+          <span class="big" data-n="04" aria-hidden="true"></span><h3>Comércio, Varejo, Saúde e Educação</h3><p class="muted">Atendimento, marketing, pacientes, alunos e congressos.</p>
+          <ul><li><q>Let me check if we have it in a medium.</q><small>Atender turista</small></li><li><q>Can you show me where it hurts?</q><small>Atendimento a estrangeiro</small></li></ul>
+        </a>
       </div>
+      <div class="car__ui"><span class="car__count" data-car-count aria-hidden="true">01/04</span><div class="car__bar" aria-hidden="true"><i></i></div><button class="iconbtn" type="button" data-car-prev aria-label="Anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="iconbtn" type="button" data-car-next aria-label="Próximo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="iconbtn" type="button" data-car-pause aria-pressed="false" aria-label="Pausar carrossel"></button></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec--noite" data-glow>
+  <span class="glow" aria-hidden="true"></span>
+  <div class="wrap split">
+    <div class="reveal">
+      <span class="siin-mark"><i></i>Tecnologia <b>SIIN</b></span>
+      <h2 class="kinetic" data-kinetic>Uma escola feita por uma <span class="mark">empresa de tecnologia</span></h2>
+      <p class="lead">A SPLA é uma marca operada pela SIIN, empresa de tecnologia de São Paulo que trabalha com inteligência artificial, bots e agentes. A mesma engenharia coloca a Sophia para conversar com você por voz e monta cada sessão a partir do seu objetivo.</p>
+      <div class="tech">
+        <div><b>IA conversacional</b><span>Conversa por voz com transcrição e correção do foco do dia.</span></div>
+        <div><b>Agentes</b><span>Montam a sessão a partir da sua área, do seu nível e da sua meta.</span></div>
+        <div><b>Bots</b><span>A Sophia responde dúvidas aqui mesmo no site.</span></div>
+        <div><b>Privacidade</b><span>Áudios e transcrições das suas conversas são privados.</span></div>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="agent" data-agent data-tilt data-tilt-max="3">
+        <div class="agent__bar" aria-hidden="true"><i></i><i></i><i></i><span>spla-agent · sessão de hoje</span></div>
+        <pre class="agent__body" data-agent-body aria-hidden="true"></pre>
+        <p class="sr-only">Demonstração ilustrativa de um agente da SPLA montando a sessão do dia: lê o objetivo e a área do aluno, escolhe a revisão, a expressão nova, o som de pronúncia e a cena de conversa com a Sophia, e define o foco de correção.</p>
+      </div>
+      <p class="small" style="margin-top:12px;color:#8E959E">Demonstração ilustrativa. O app SPLA está previsto para 2027.</p>
     </div>
   </div>
 </section>
@@ -140,12 +237,12 @@
   <div class="wrap">
     <div class="pledge reveal">
       <p class="eyebrow" style="color:#C9CDD3">Nosso compromisso</p>
-      <h2>Você vai <span class="mark">sair falando</span></h2>
+      <h2 class="fill" data-fill>Você vai <span class="mark">sair falando</span></h2>
       <p class="lead" style="color:#D9DCE0">A trilha vai do zero ao C1 e segue os níveis do CEFR, a escala internacional de proficiência. Você sabe onde está, aonde vai e o que falta.</p>
       <div class="grid grid--3">
-        <div class="card"><h3>Garantia de evolução</h3><p>Se você fizer as atividades e não sentir progresso, a gente refaz o seu plano sem custo.</p></div>
-        <div class="card"><h3>Progresso que dá para ver</h3><p>Tarefas de fala repetidas ao longo das semanas mostram o antes e o depois. Não é sensação, é a sua voz.</p></div>
-        <div class="card"><h3>Certificado por nível</h3><p>Ao concluir cada nível, você recebe o certificado da SPLA com o seu nível equivalente (CEFR).</p></div>
+        <div class="card" data-tilt data-tilt-max="4"><h3>Garantia de evolução</h3><p>Se você fizer as atividades e não sentir progresso, a gente refaz o seu plano sem custo.</p></div>
+        <div class="card" data-tilt data-tilt-max="4"><h3>Progresso que dá para ver</h3><p>Tarefas de fala repetidas ao longo das semanas mostram o antes e o depois. Não é sensação, é a sua voz.</p></div>
+        <div class="card" data-tilt data-tilt-max="4"><h3>Certificado por nível</h3><p>Ao concluir cada nível, você recebe o certificado da SPLA com o seu nível equivalente (CEFR).</p></div>
       </div>
     </div>
   </div>
@@ -160,17 +257,25 @@
       <p><a class="link-arrow" href="{{root}}empresas/">Como funciona para empresas</a></p>
     </div>
     <div class="reveal">
-      <img src="{{root}}assets/img/turma.webp" alt="Sophia, Erick e Teacher Lili lado a lado, desenhados em formas geométricas" width="760" height="472" loading="lazy" style="border-radius:24px;border:1px solid var(--linha);background:var(--papel)">
+      <div class="squad-ui" data-squad data-tilt data-tilt-max="4" aria-hidden="true">
+        <div class="squad-ui__top"><b>Squad Financeiro</b><span class="badge">On Track</span></div>
+        <div class="squad-ui__row"><span style="background:#F5C518">A</span><div><i style="--w:.8"></i></div></div>
+        <div class="squad-ui__row"><span style="background:#F9E3E3">B</span><div><i style="--w:.55"></i></div></div>
+        <div class="squad-ui__row"><span style="background:#DDF3E8">C</span><div><i style="--w:.7"></i></div></div>
+        <div class="squad-ui__row"><span style="background:#F3EBDD">D</span><div><i style="--w:.4"></i></div></div>
+        <div class="squad-ui__goal"><span class="ring"></span><p><b>Meta coletiva do Sprint</b><br>Semana 2 de 4 · Construa</p></div>
+      </div>
+      <p class="squad-ui__note">Ilustração. O painel do RH está em desenvolvimento.</p>
     </div>
   </div>
 </section>
 
 <section class="sec">
   <div class="wrap split split--rev">
-    <div class="reveal"><div class="tile-demo" role="img" aria-label="Padrão do piso paulista em creme sobre creme"></div></div>
+    <div class="reveal"><div class="tile-reveal" data-tile-reveal role="img" aria-label="Padrão inspirado no piso paulista, em creme sobre creme, que se revela sob o ponteiro"><span data-tile-hint>Passe o mouse para revelar o piso</span></div></div>
     <div class="reveal">
       <p class="eyebrow">Nascemos em São Paulo</p>
-      <h2>Uma escola com o sotaque da cidade</h2>
+      <h2 class="kinetic" data-kinetic>Uma escola com o <span class="mark">sotaque da cidade</span></h2>
       <p class="lead">Nossa identidade vem do modernismo da Semana de 1922 e do piso das calçadas paulistanas, que milhões de pessoas pisam todos os dias.</p>
       <p class="small muted">Padrão inspirado no piso paulista criado por Mirthes Bernardes (1966).</p>
       <p><a class="link-arrow" href="{{root}}sao-paulo/">Conhecer a história</a></p>
@@ -178,10 +283,11 @@
   </div>
 </section>
 
-<section class="cta">
+<section class="cta spot" data-spot>
   <div class="wrap">
-    <h2>Bora começar? Tamo junto.</h2>
+    <p class="eyebrow eyebrow--red">Diagnóstico rápido</p>
+    <h2 class="kinetic" data-kinetic>Bora começar? <span class="mark">Tamo junto.</span></h2>
     <p class="lead">Responda quatro perguntas rápidas e a gente indica a melhor trilha para você.</p>
-    <div class="btns"><a class="btn btn--yellow" href="{{root}}contato/#diagnostico">Fazer o diagnóstico rápido</a><button class="btn btn--ghost" type="button" data-open-sophia>Pergunte à Sophia</button></div>
+    <div class="btns"><a class="btn btn--big" data-magnetic href="{{root}}contato/#diagnostico">Fazer o diagnóstico rápido <span class="btn__arrow" aria-hidden="true">→</span></a><button class="btn btn--ghost" type="button" data-open-sophia data-magnetic>Pergunte à Sophia</button></div>
   </div>
 </section>

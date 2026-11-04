@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SPLA site v0 — gerador estático simples (sem dependências).
+"""SPLA site v1 — gerador estático simples (sem dependências).
 Uso: python3 build.py [--prod]
   padrão  = PRÉVIA (noindex + robots Disallow), para github.io
   --prod  = produção (indexável), só quando o Joël aprovar o domínio.
@@ -11,7 +11,7 @@ ROOT = Path(__file__).parent
 SRC, OUT = ROOT / 'src', ROOT / 'site'
 PROD = '--prod' in sys.argv
 CANON = 'https://splacademy.com.br/'
-VERSION = '0.1.0'
+VERSION = '1.0.0'
 PREVIEW_BASE = '/splacademy-site/'  # caminho no github.io (prévia)
 WA = 'https://wa.me/5511981783554'
 EMAIL = 'contact@splacademy.com.br'
@@ -32,6 +32,15 @@ def page_meta(text):
     m = re.match(r'\s*<!--meta\s*(\{.*?\})\s*-->', text, re.S)
     if not m: raise SystemExit('meta ausente')
     return json.loads(m.group(1)), text[m.end():]
+
+def pic_html(m, root):
+    """{{pic:nome|alt|sizes}} -> <picture> avif+webp 360/720 (3:4) com lazy-load."""
+    parts = m.group(1).split('|')
+    name, alt = parts[0], parts[1] if len(parts) > 1 else ''
+    sizes = parts[2] if len(parts) > 2 else '(min-width:1000px) 380px, 84vw'
+    base = f'{root}assets/img/v1/{name}'
+    return (f'<picture><source type="image/avif" srcset="{base}-360.avif 360w, {base}-720.avif 720w" sizes="{sizes}">'
+            f'<img src="{base}-720.webp" srcset="{base}-360.webp 360w, {base}-720.webp 720w" sizes="{sizes}" width="720" height="960" alt="{html.escape(alt)}" loading="lazy" decoding="async"></picture>')
 
 def faq_html(faq, root):
     out = ['<div class="faq">']
@@ -68,16 +77,16 @@ def layout(t, meta, body, slug, lang_codes, url_path, root):
     if is_pt:
         scripts += f'<script>window.SPLA_I18N={json.dumps(t["js"], ensure_ascii=False)};</script>'
         scripts += f'<script src="{root}assets/js/faq.pt-BR.js?v={VERSION}" defer></script>'
-    if meta.get('scenes'):
-        scripts += f'<script>window.SPLA_SCENES={json.dumps(load("data/scenes.pt-BR.json"), ensure_ascii=False)};</script>'
+    if meta.get('dialogs'):
+        scripts += f'<script>window.SPLA_DIALOGS={json.dumps(load("data/dialogs.pt-BR.json"), ensure_ascii=False)};</script>'
     scripts += f'<script src="{root}assets/js/site.js?v={VERSION}" defer></script>'
     sophia = ''
     if is_pt:
         sophia = f'''
-<button class="sophia-fab" type="button" aria-controls="sophia" aria-expanded="false"><img src="{root}assets/img/sophia-160.webp" alt="" width="44" height="44">{t["sp_open"]}</button>
+<button class="sophia-fab" type="button" aria-controls="sophia" aria-expanded="false" data-magnetic><span class="sophia-fab__face"><img src="{root}assets/img/v1/sophia-face-96.webp" alt="" width="44" height="44"></span><span class="sophia-fab__t">{t["sp_open"]}</span></button>
 <section class="sp" id="sophia" role="dialog" aria-modal="false" aria-labelledby="sp-title" aria-hidden="true">
   <div class="sp__head">
-    <div class="sp__face" data-rig="sophia" data-label="Sophia"><img src="{root}assets/img/sophia-160.webp" alt="" width="64" height="64"></div>
+    <div class="sp__face"><img src="{root}assets/img/v1/sophia-face-192.webp" alt="Sophia, tutora de IA da SPLA, em 3D" width="64" height="64"></div>
     <div class="sp__title" id="sp-title">{t["sp_title"]}<small>{t["sp_sub"]}</small></div>
     <button class="iconbtn sp__close" type="button" aria-label="{t["sp_close"]}">{ICON["close"]}</button>
   </div>
@@ -100,10 +109,12 @@ def layout(t, meta, body, slug, lang_codes, url_path, root):
 <link rel="canonical" href="{canon}">
 {alts}
 <meta name="theme-color" content="#FAF7F1">
+<meta name="generator" content="SPLA build v{VERSION} · SIIN">
 <link rel="icon" href="{root}assets/img/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="{root}assets/img/apple-touch-icon.png">
 <link rel="manifest" href="{root}manifest.webmanifest">
 <link rel="preload" href="{root}assets/fonts/source-sans-3-wght.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{root}assets/fonts/space-grotesk-wght.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{root}assets/css/site.css?v={VERSION}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="SPLA · São Paulo Languages Academy">
@@ -113,12 +124,13 @@ def layout(t, meta, body, slug, lang_codes, url_path, root):
 <meta property="og:url" content="{canon}">
 <meta property="og:image" content="{ogimg}">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="SPLA · Sophia, a tutora de IA, e o padrão do piso paulista em tons de creme">
+<meta property="og:image:alt" content="SPLA · Sophia, a tutora de IA em 3D, numa chamada de voz">
 <meta name="twitter:card" content="summary_large_image">
 {head_extra}
 </head>
 <body>
 <a class="skip" href="#main">{t["skip"]}</a>
+<div class="progress" aria-hidden="true"><i></i></div>
 <header class="top">
   <div class="wrap top__in">
     <a class="logo" href="{root}{t["prefix"]}" aria-label="{t["home_label"]}">{MARK}<span class="logo__t"><b>São Paulo</b><span>Languages Academy</span></span></a>
@@ -134,13 +146,14 @@ def layout(t, meta, body, slug, lang_codes, url_path, root):
 <footer class="foot">
   <div class="foot__strip" aria-hidden="true"></div>
   <div class="wrap">
+    <p class="foot__big" aria-hidden="true" data-foot-big>São Paulo · Tamo junto ·</p>
     <div class="foot__grid">
       <div><a class="logo" href="{root}{t["prefix"]}" aria-label="{t["home_label"]}">{MARK}<span class="logo__t"><b>São Paulo</b><span>Languages Academy</span></span></a><p>{t["foot_about"]}</p></div>
       <div><h2>{t["foot_site"]}</h2><ul>{foot_links or f'<li><a href="{root}">Português</a></li>'}</ul></div>
       <div><h2>{t["foot_more"]}</h2><ul><li><a href="{root}contato/#faq">{t["foot_faq"]}</a></li>{'<li><a href="#sophia" data-open-sophia>'+t["foot_sophia"]+'</a></li>' if is_pt else ''}<li><a href="{root}privacidade/">{t["foot_privacy"]}</a></li></ul></div>
       <div><h2>{t["foot_talk"]}</h2><ul><li><a href="mailto:{EMAIL}">{EMAIL}</a></li><li><a href="{wa_top}" target="_blank" rel="noopener">{t["wa_label"]} +55 11 9 8178-3554</a></li><li><span>São Paulo, SP</span></li></ul></div>
     </div>
-    <div class="foot__legal"><span>{t["foot_legal"]}</span><span>{t["foot_chars"]}</span><span>{t["foot_credit"]}</span>{preview_note}</div>
+    <div class="foot__legal"><span class="foot__tech"><i></i>{t["foot_tech"]}</span><span>{t["foot_legal"]}</span><span>{t["foot_chars"]}</span><span>{t["foot_credit"]}</span>{preview_note}</div>
   </div>
 </footer>
 {sophia}
@@ -158,7 +171,7 @@ def main():
     if OUT.exists(): shutil.rmtree(OUT)
     OUT.mkdir()
     # assets
-    for sub in ['fonts', 'img', 'svg', 'js']:
+    for sub in ['fonts', 'img', 'js', 'vendor', 'media']:
         shutil.copytree(SRC / 'assets' / sub, OUT / 'assets' / sub)
     (OUT / 'assets/css').mkdir(parents=True)
     (OUT / 'assets/css/site.css').write_text(minify_css((SRC / 'assets/css/site.css').read_text(encoding='utf-8')), encoding='utf-8')
@@ -175,6 +188,7 @@ def main():
             else: rel = t['prefix'] + slug + '/'
             depth = 0 if rel is None else rel.count('/')
             root = '../' * depth
+            body = re.sub(r'\{\{pic:([^}]*)\}\}', lambda m: pic_html(m, root), body)
             body = body.replace('{{root}}', root).replace('{{wa}}', WA).replace('{{email}}', EMAIL)
             for k, v in ICON.items(): body = body.replace('{{icon:' + k + '}}', v)
             if '{{faq}}' in body: body = body.replace('{{faq}}', faq_html(faq, root))
