@@ -638,3 +638,32 @@ tr:last-child td,tr:last-child th{border-bottom:0}
 
 .sec--noite{position:relative;overflow:clip}
 .big::before,.step__n::before{content:attr(data-n)}
+/* ---------- SIIN Company (brandbook v1: Nexus Black, Clarity White, Steel Logic Gray; Neural Yellow only in the logo node) ---------- */
+.sec--siin{--siin-black:#0A0A0A;--siin-white:#F5F5F3;--siin-gray:#8C9094;background:var(--siin-black);color:var(--siin-white)}
+.sec--siin h2,.sec--siin h3{color:var(--siin-white)}
+.sec--siin .lead,.sec--siin p{color:rgba(245,245,243,.76)}
+.sec--siin .mark{color:var(--siin-white);background-image:linear-gradient(transparent 88%,var(--siin-gray) 88%,var(--siin-gray) 94%,transparent 94%)}
+.sec--siin .glow{background:radial-gradient(circle,rgba(245,245,243,.06),transparent 65%)}
+.siin-logo{display:inline-block;margin:0 0 20px;line-height:0;border-radius:4px}
+.siin-logo img{width:208px;height:auto;display:block}
+.siin-logo:focus-visible{outline:2px solid var(--siin-white);outline-offset:8px}
+.sec--siin .siin-label{font-family:var(--mono);font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;color:var(--siin-gray);margin:0 0 56px}
+.sec--siin .tech div{border-color:rgba(245,245,243,.1);background:rgba(245,245,243,.02)}
+.sec--siin .tech b{color:var(--siin-white)}
+.sec--siin .tech span,.sec--siin .siin-note{color:var(--siin-gray)}
+.sec--siin .agent{background:#111111;border-color:#222222;color:#E6E6E4}
+.sec--siin .agent__bar{border-color:#222222;color:var(--siin-gray)}
+.sec--siin .agent__bar i,.sec--siin .agent__bar i:nth-child(n){background:#2B2B2B}
+.sec--siin .agent__body .p,.sec--siin .agent__body .ok{color:var(--siin-white)}
+.sec--siin .agent__body .dim{color:var(--siin-gray)}
+.sec--siin .agent__body .hl{background:rgba(245,245,243,.12);color:var(--siin-white)}
+.foot__siin{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#8C9094;text-decoration:none}
+.foot__siin img{width:28px;height:28px;border-radius:4px;flex:none}
+.foot__siin:hover span{color:#F5F5F3}
+/* ---------- Sophia FAB: compact pill, hidden while the home hero is on screen ---------- */
+.sophia-fab{min-height:48px;padding:5px 14px 5px 5px;gap:8px;font-size:.9rem;transition:opacity .3s ease,transform .3s ease,visibility 0s linear 0s}
+.sophia-fab__face{width:38px;height:38px}
+.sophia-fab.is-away{opacity:0;transform:translateY(14px) scale(.92);visibility:hidden;pointer-events:none;transition:opacity .25s ease,transform .25s ease,visibility 0s linear .25s}
+@media (max-width:480px){.sophia-fab{right:12px;bottom:12px;padding:5px;min-height:0}.sophia-fab__t{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}}
+@media (prefers-reduced-motion:reduce){.sophia-fab,.sophia-fab.is-away{transition:none}}
+.sec--siin .caret{background:var(--siin-white)}

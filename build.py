@@ -153,7 +153,7 @@ def layout(t, meta, body, slug, lang_codes, url_path, root):
       <div><h2>{t["foot_more"]}</h2><ul><li><a href="{root}contato/#faq">{t["foot_faq"]}</a></li>{'<li><a href="#sophia" data-open-sophia>'+t["foot_sophia"]+'</a></li>' if is_pt else ''}<li><a href="{root}privacidade/">{t["foot_privacy"]}</a></li></ul></div>
       <div><h2>{t["foot_talk"]}</h2><ul><li><a href="mailto:{EMAIL}">{EMAIL}</a></li><li><a href="{wa_top}" target="_blank" rel="noopener">{t["wa_label"]} +55 11 9 8178-3554</a></li><li><span>São Paulo, SP</span></li></ul></div>
     </div>
-    <div class="foot__legal"><span class="foot__tech"><i></i>{t["foot_tech"]}</span><span>{t["foot_legal"]}</span><span>{t["foot_chars"]}</span><span>{t["foot_credit"]}</span>{preview_note}</div>
+    <div class="foot__legal"><a class="foot__siin" href="https://siincompany.com" target="_blank" rel="noopener"><img src="{root}assets/img/siin/siin-icon.svg" alt="" width="28" height="28" loading="lazy"><span>{t["foot_tech"]}</span></a><span>{t["foot_legal"]}</span><span>{t["foot_chars"]}</span><span>{t["foot_credit"]}</span>{preview_note}</div>
   </div>
 </footer>
 {sophia}
