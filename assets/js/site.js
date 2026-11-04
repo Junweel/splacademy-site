@@ -618,6 +618,105 @@ if (fab && panel && FAQ.length) {
   $$('[data-open-sophia]').forEach(b => b.addEventListener('click', e => { e.preventDefault(); open(true); }));
 }
 
+/* ---------- v2 · constelação de métodos (Feita por gente) ---------- */
+$$('[data-constel]').forEach(c => {
+  const svg = $('.constel__lines', c), nodes = $$('.constel__nodes li', c), NS = 'http://www.w3.org/2000/svg';
+  c.classList.add('is-live'); if (FINE) c.classList.add('is-fine');
+  // posições: três anéis elípticos ao redor do núcleo, recalculadas em px e presas às bordas
+  const per = Math.ceil(nodes.length / 3);
+  const base = nodes.map((li, i) => { const ring = i % 3, k = Math.floor(i / 3); return { a: (k / per) * Math.PI * 2 + ring * (Math.PI / per) * 0.66 + 0.35, ring }; });
+  let pos = base.map(() => ({ x: 50, y: 50 }));
+  let act = nodes.map(() => true);
+  const place = r => {
+    const mob = r.width < 600, W = r.width, Hh = r.height, m = 8, core = (mob ? 104 : 132) / 2 + 10;
+    act = nodes.map((li, i) => !mob || i < 12); nodes.forEach((li, i) => li.classList.toggle('is-off', !act[i]));
+    const idx = nodes.map((_, i) => i).filter(i => act[i]), n = idx.length;
+    const P = idx.map((i, k) => { const w = nodes[i].offsetWidth + 6, h = nodes[i].offsetHeight + 6, ring = k % 3, a = (k / n) * Math.PI * 2 + .3, f = [.55, .78, 1][ring];
+      return { i, w, h, x: W / 2 + Math.cos(a) * f * (W / 2 - w / 2 - m), y: Hh / 2 + Math.sin(a) * f * (Hh / 2 - h / 2 - m - 12) }; });
+    for (let it = 0; it < 220; it++) {
+      for (let p = 0; p < n; p++) for (let q = p + 1; q < n; q++) {
+        const A = P[p], B = P[q], ox = (A.w + B.w) / 2 - Math.abs(A.x - B.x), oy = (A.h + B.h) / 2 - Math.abs(A.y - B.y);
+        if (ox > 0 && oy > 0) { if (ox < oy * 2.2) { const s2 = (A.x < B.x ? -1 : 1) * ox / 2; A.x += s2; B.x -= s2; } else { const s2 = (A.y < B.y ? -1 : 1) * oy / 2; A.y += s2; B.y -= s2; } }
+      }
+      P.forEach(A => { // afasta do núcleo
+        const dx = Math.max(Math.abs(A.x - W / 2) - A.w / 2, 0), dy = Math.max(Math.abs(A.y - Hh / 2) - A.h / 2, 0), dd = Math.hypot(dx, dy);
+        if (dd < core) { const ang = Math.atan2(A.y - Hh / 2 || .01, A.x - W / 2), k = (core - dd) * .6; A.x += Math.cos(ang) * k; A.y += Math.sin(ang) * k; }
+        A.x = Math.min(W - m - A.w / 2, Math.max(m + A.w / 2, A.x)); A.y = Math.min(Hh - m - A.h / 2 - 24, Math.max(m + A.h / 2, A.y));
+      });
+    }
+    pos = nodes.map(() => ({ x: 50, y: 50 }));
+    P.forEach(A => { nodes[A.i].style.left = A.x + 'px'; nodes[A.i].style.top = A.y + 'px'; pos[A.i] = { x: A.x / W * 100, y: A.y / Hh * 100 }; });
+  };
+  const lines = [];
+  const mk = () => { const l = d.createElementNS(NS, 'line'); svg.appendChild(l); return l; };
+  nodes.forEach((li, i) => { lines.push({ a: -1, b: i, el: mk() }); const j = (i + 3) % nodes.length; lines.push({ a: i, b: j, el: mk() }); });
+  const lit = new Float32Array(nodes.length);
+  const layout = () => {
+    const r = c.getBoundingClientRect(); place(r); svg.setAttribute('viewBox', `0 0 ${r.width} ${r.height}`);
+    const P = i => i < 0 ? [r.width / 2, r.height / 2] : [pos[i].x / 100 * r.width, pos[i].y / 100 * r.height];
+    lines.forEach(L => { const [x1, y1] = P(L.a), [x2, y2] = P(L.b); L.el.setAttribute('x1', x1); L.el.setAttribute('y1', y1); L.el.setAttribute('x2', x2); L.el.setAttribute('y2', y2); });
+  };
+  const paint = () => {
+    nodes.forEach((li, i) => { li.style.setProperty('--lit', lit[i].toFixed(3)); li.classList.toggle('is-hot', lit[i] > .85); });
+    lines.forEach(L => { const on = act[L.b] && (L.a < 0 || act[L.a]), v = L.a < 0 ? lit[L.b] : Math.min(lit[L.a], lit[L.b]); L.el.style.opacity = on ? (0.05 + v * 0.55).toFixed(3) : 0; });
+  };
+  layout(); addEventListener('resize', layout, { passive: true });
+  if (reduced()) { lit.fill(.75); paint(); return; }
+  if (FINE) {
+    c.addEventListener('pointermove', e => {
+      const r = c.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top, R = Math.max(150, r.width * .26);
+      nodes.forEach((li, i) => { const dx = pos[i].x / 100 * r.width - mx, dy = pos[i].y / 100 * r.height - my; lit[i] = Math.max(0, 1 - Math.hypot(dx, dy) / R); });
+      paint(); $('[data-constel-hint]', c)?.remove();
+    });
+    c.addEventListener('pointerleave', () => { lit.fill(0); paint(); });
+  }
+  // onda automática ao entrar na tela (toque e mouse parado)
+  let t0 = 0, vis = false, idle = true, raf = 0;
+  c.addEventListener('pointermove', () => { idle = false; clearTimeout(c._idle); c._idle = setTimeout(() => idle = true, 2500); });
+  const wave = now => {
+    if (!vis) { raf = 0; return; }
+    if (idle) { const t = (now - t0) / 1000; nodes.forEach((li, i) => { const ph = Math.atan2(pos[i].y - 50, pos[i].x - 50); lit[i] = Math.max(0, Math.cos(ph - t * 1.1)) ** 3; }); paint(); }
+    raf = requestAnimationFrame(wave);
+  };
+  new IntersectionObserver(es => es.forEach(e => { vis = e.isIntersecting; if (vis && !raf) { t0 = performance.now(); raf = requestAnimationFrame(wave); } })).observe(c);
+});
+/* ---------- v2 · elenco com parallax leve ---------- */
+if (FINE && !reduced()) $$('.trio-real__cast').forEach(box => {
+  const cs = $$('.cast', box);
+  box.addEventListener('pointermove', e => { const r = box.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; cs.forEach((c, i) => { const k = (i + 1) * 6; c.style.setProperty('--px', (x * k).toFixed(1) + 'px'); c.style.setProperty('--py', (y * k).toFixed(1) + 'px'); }); });
+  box.addEventListener('pointerleave', () => cs.forEach(c => { c.style.setProperty('--px', '0px'); c.style.setProperty('--py', '0px'); }));
+});
+/* ---------- v2 · rede de orquestração (camada humana ↔ tecnologia) ---------- */
+$$('[data-orq]').forEach(box => {
+  const cv = $('canvas', box), ctx = cv.getContext('2d'), H = $$('.orq__col--h li', box), T = $$('.orq__col--t li', box);
+  let W = 0, Hh = 0, dpr = 1, A = [], B = [], hub = [0, 0], pulses = [], vis = false, last = 0;
+  const layout = () => {
+    const r = box.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1); W = r.width; Hh = r.height;
+    cv.width = W * dpr; cv.height = Hh * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    A = H.map(li => { const q = li.getBoundingClientRect(); return [q.right - r.left, q.top - r.top + q.height / 2]; });
+    B = T.map(li => { const q = li.getBoundingClientRect(); return [q.left - r.left, q.top - r.top + q.height / 2]; });
+    hub = [W / 2, Hh / 2];
+  };
+  const curve = (p, q, t) => { const cx = (p[0] + q[0]) / 2, x = (1 - t) ** 3 * p[0] + 3 * (1 - t) ** 2 * t * cx + 3 * (1 - t) * t * t * cx + t ** 3 * q[0], y = (1 - t) ** 3 * p[1] + 3 * (1 - t) ** 2 * t * p[1] + 3 * (1 - t) * t * t * q[1] + t ** 3 * q[1]; return [x, y]; };
+  const path = (p, q) => { const cx = (p[0] + q[0]) / 2; ctx.moveTo(p[0], p[1]); ctx.bezierCurveTo(cx, p[1], cx, q[1], q[0], q[1]); };
+  const draw = dt => {
+    ctx.clearRect(0, 0, W, Hh);
+    ctx.strokeStyle = 'rgba(245,245,243,.12)'; ctx.lineWidth = 1; ctx.beginPath();
+    A.forEach(p => path(p, hub)); B.forEach(q => path(hub, q)); ctx.stroke();
+    // hub: quadrado neutro (o amarelo fica só no logo)
+    ctx.strokeStyle = 'rgba(245,245,243,.7)'; ctx.strokeRect(hub[0] - 9, hub[1] - 9, 18, 18);
+    ctx.fillStyle = 'rgba(245,245,243,.9)'; ctx.fillRect(hub[0] - 3, hub[1] - 3, 6, 6);
+    if (dt > 0 && Math.random() < dt * 5 && A.length) { const i = Math.random() * A.length | 0, j = Math.random() * B.length | 0; pulses.push({ i, j, t: 0 }); }
+    ctx.fillStyle = '#F5F5F3';
+    pulses = pulses.filter(p => { p.t += dt * .45; if (p.t > 1) return false; const [x, y] = p.t < .5 ? curve(A[p.i], hub, p.t * 2) : curve(hub, B[p.j], (p.t - .5) * 2); ctx.globalAlpha = Math.sin(p.t * Math.PI); ctx.fillRect(x - 2, y - 2, 4, 4); ctx.globalAlpha = 1; return true; });
+  };
+  layout(); addEventListener('resize', () => { layout(); draw(0); }, { passive: true });
+  if (reduced()) { draw(0); return; }
+  const loop = now => { const dt = Math.min(.05, (now - last) / 1000 || 0); last = now; if (vis && !d.hidden) draw(dt); requestAnimationFrame(loop); };
+  new IntersectionObserver(es => es.forEach(e => { vis = e.isIntersecting; if (vis) layout(); })).observe(box);
+  requestAnimationFrame(loop);
+});
+
 /* ---------- movimento rico: GSAP + ScrollTrigger + Lenis, só se permitido ---------- */
 const scrubs = [];
 $$('.timeline').forEach(el => scrubs.push({ el, prop: '--tl', start: 'top 75%', end: 'bottom 60%' }));
