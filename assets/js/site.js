@@ -421,19 +421,29 @@ $$('[data-field]').forEach(cv => {
 
 const asrc = n => BASE + 'assets/audio/' + n + '.mp3';
 const VOX = { a: null, btn: null, onStop: null };
+const lipsrc = n => MEDIA + 'lip-' + n + VEXT;
+const hideLip = v => { v.pause(); v.classList.remove('is-on'); };
 function voxStop() {
-  if (VOX.a) { VOX.a.pause(); VOX.a.onended = VOX.a.onerror = null; VOX.a = null; }
+  const a = VOX.a;
+  if (a) { a.onended = a.onerror = a.onpause = null; a.pause(); if (a.tagName === 'VIDEO') hideLip(a); VOX.a = null; }
   if (VOX.btn) VOX.btn.setAttribute('aria-pressed', 'false');
   const f = VOX.onStop; VOX.btn = VOX.onStop = null; if (f) f();
 }
-// toca um arquivo; resolve quando termina (ou é interrompido)
-function voxPlay(name, btn, onStop) {
+// toca uma fala; com vídeo, a boca e a voz vêm do MESMO arquivo (lip-sync). Resolve quando termina.
+function voxPlay(name, btn, onStop, vid) {
   voxStop();
   return new Promise(res => {
-    const a = new Audio(asrc(name)); a.preload = 'auto';
+    let a;
+    if (vid && canVideo()) {
+      a = vid; const src = lipsrc(name);
+      if (a.dataset.clip !== name) { a.dataset.clip = name; a.src = src; }
+      a.muted = false; try { a.currentTime = 0; } catch (e) {}
+      a.onplaying = () => { if (VOX.a === a) a.classList.add('is-on'); };
+    } else { a = new Audio(asrc(name)); a.preload = 'auto'; }
     VOX.a = a; VOX.btn = btn || null; VOX.onStop = () => { onStop && onStop(); res(false); };
     if (btn) btn.setAttribute('aria-pressed', 'true');
-    a.onended = () => { if (VOX.a === a) { VOX.a = null; if (VOX.btn) VOX.btn.setAttribute('aria-pressed', 'false'); const f = VOX.onStop; VOX.btn = VOX.onStop = null; onStop && onStop(); } res(true); };
+    a.onended = () => { if (VOX.a === a) { a.onended = a.onerror = a.onpause = null; if (a.tagName === 'VIDEO') hideLip(a); VOX.a = null; if (VOX.btn) VOX.btn.setAttribute('aria-pressed', 'false'); VOX.btn = VOX.onStop = null; onStop && onStop(); } res(true); };
+    a.onpause = () => { if (VOX.a === a && !a.ended) voxStop(); };
     a.onerror = () => { if (VOX.a === a) voxStop(); res(false); };
     a.play().catch(() => { if (VOX.a === a) voxStop(); res(false); });
   });
@@ -441,9 +451,8 @@ function voxPlay(name, btn, onStop) {
 $$('[data-voice]').forEach(b => b.addEventListener('click', e => {
   e.stopPropagation();
   if (b.getAttribute('aria-pressed') === 'true') { voxStop(); return; }
-  const host = b.closest('.who-card,.tile'); const v = host && $('video', host);
-  if (v && canVideo()) { loadVid(v); v.play().then(() => v.classList.add('is-on')).catch(() => {}); }
-  voxPlay(b.dataset.voice, b, () => { if (v && v.hasAttribute('data-hover-video')) { v.pause(); v.classList.remove('is-on'); } });
+  const host = b.closest('.who-card,.tile'); const v = host && $('video.lip', host);
+  voxPlay(b.dataset.voice, b, null, v);
 }));
 // clique no botão não deve arrastar o carrossel
 $$('[data-voice]').forEach(b => b.addEventListener('pointerdown', e => e.stopPropagation()));
@@ -452,42 +461,23 @@ $$('[data-voice]').forEach(b => b.addEventListener('pointerdown', e => e.stopPro
 const call = $('[data-call]');
 const DIALOGS = window.SPLA_DIALOGS || [];
 if (call && DIALOGS.length) (() => {
-  const vids = $$('.call__vid', call), subs = $('[data-call-subs]', call), tag = $('[data-call-tag]', call);
+  const lip = $('.call__vid', call), vids = lip ? [lip] : [], subs = $('[data-call-subs]', call), tag = $('[data-call-tag]', call);
   const dots = $('[data-call-dots]', call), pbtn = $('[data-call-pause]', call), clock = $('[data-call-time]', call);
   const wave = $('[data-call-wave]', call), wctx = wave?.getContext('2d');
-  const useVid = canVideo() && vids.length === 2;
+  const DUR = { q0: 2690, q1: 2120, q2: 2350, q3: 2430, q4: 2770, q5: 3240, r0: 3630, r1: 3710, r2: 2770, r3: 3000, r4: 2850, r5: 3470 };
   const sbtn = $('[data-call-sound]', call); let sound = false;
-  const say = (name, my) => { if (sound && my === run) voxPlay(name, null, null); };
-  if (!useVid) vids.forEach(v => v.remove());
+  // fala da Sophia: com som, toca o vídeo com lip-sync (voz+boca juntos); sem som, só a legenda sobre a foto parada
+  const line = async (key, p, my) => {
+    const ms = DUR[key] || 3000;
+    if (sound && my === run) { const v = voxPlay('hero-' + key, null, null, lip); await Promise.all([v, reveal(p, ms - 200, my, 'sophia')]); if (my !== run) throw 0; }
+    else await reveal(p, ms, my, 'sophia');
+  };
   let i = 0, run = 0, userPaused = reduced(), offscreen = false, cur = 0, secs = 0;
   const paused = () => userPaused || offscreen || d.hidden;
   const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const words = s => s.split(' ').map(w => `<span class="w">${esc(w)}</span>`).join(' ');
   // espera que respeita pausa e troca de cena
   const sleep = async (ms, my) => { let left = ms; while (left > 0) { if (my !== run) throw 0; if (paused()) { await wait(120); continue; } const st = Math.min(60, left); await wait(st); left -= st; } if (my !== run) throw 0; };
-  // vídeo em buffer duplo
-  const prep = (v, name) => { if (v.dataset.clip !== name) { v.dataset.clip = name; v.src = vsrc('sophia-' + name); v.preload = 'auto'; v.load(); } };
-  async function clip(name, nextName, my, body) {
-    let v = null;
-    if (useVid) {
-      v = vids[cur]; const o = vids[1 - cur];
-      prep(v, name); try { v.currentTime = 0; } catch (e) {}
-      await v.play().catch(() => {});
-      v.classList.add('is-on'); setTimeout(() => { o.classList.remove('is-on'); setTimeout(() => prep(o, nextName), 300); }, 120);
-    }
-    const t0 = performance.now();
-    const bodyP = body ? body().catch(e => { if (e !== 0) console.warn(e); }) : null;
-    let played = 0;
-    while (true) {
-      if (my !== run) { v?.pause(); throw 0; }
-      if (paused()) { v && !v.paused && v.pause(); await wait(120); continue; }
-      if (v && v.paused && !v.ended) v.play().catch(() => {});
-      await wait(60); played += 60;
-      if (v ? (v.ended || (v.duration && v.currentTime >= v.duration - .04) || played > 9000) : played >= 5000) break;
-    }
-    await bodyP;
-    if (useVid) cur = 1 - cur;
-  }
   const push = (cls, html) => {
     $$('.sub', subs).forEach(s => s.classList.add('sub--old'));
     const old = $$('.sub--old', subs); while (old.length > 1) old.shift().remove();
@@ -519,18 +509,20 @@ if (call && DIALOGS.length) (() => {
   function mark() { $$('button', dots).forEach((b, n) => b.setAttribute('aria-pressed', n === i)); tag.textContent = DIALOGS[i].tag; }
   async function scene(my) {
     const s = DIALOGS[i]; mark();
-    await clip('speak1', 'nod', my, async () => { await sleep(350, my); say('hero-q' + i, my); const p = push('', who('Sophia') + words(s.sophia)); await reveal(p, 3600, my, 'sophia'); });
-    await clip('nod', 'happy', my, async () => { await sleep(250, my); const p = push('sub--you', who(T.you || 'Você') + youHTML(s)); await reveal(p, 3300, my, 'you'); });
-    await clip('happy', 'speak1', my, async () => { await sleep(200, my); say('hero-r' + i, my); const p = push('', who('Sophia') + words(s.reply)); await reveal(p, 2600, my, 'sophia'); await sleep(250, my); push('sub--tip', `<b>${T.tipLabel || 'Dica da Sophia'}:</b> ${s.tip}`); });
+    await sleep(350, my); { const p = push('', who('Sophia') + words(s.sophia)); await line('q' + i, p, my); }
+    await sleep(350, my); { const p = push('sub--you', who(T.you || 'Você') + youHTML(s)); await reveal(p, 3300, my, 'you'); }
+    await sleep(300, my); { const p = push('', who('Sophia') + words(s.reply)); await line('r' + i, p, my); }
+    await sleep(250, my); push('sub--tip', `<b>${T.tipLabel || 'Dica da Sophia'}:</b> ${s.tip}`);
+    await sleep(2600, my);
   }
   async function loop() {
-    const my = ++run; VOICE.target = 0;
+    voxStop(); const my = ++run; VOICE.target = 0;
     if (reduced()) { staticScene(DIALOGS[i]); mark(); return; }
     subs.innerHTML = '';
     try { for (;;) { await scene(my); i = (i + 1) % DIALOGS.length; } } catch (e) { if (e !== 0) console.warn(e); }
   }
   DIALOGS.forEach((s, n) => { const b = d.createElement('button'); b.type = 'button'; b.textContent = s.tag; b.setAttribute('aria-pressed', n === 0); b.setAttribute('aria-label', (T.scene || 'Cena') + ': ' + s.tag); b.addEventListener('click', () => { i = n; if (reduced()) { staticScene(DIALOGS[i]); mark(); } else { if (userPaused) setP(false); loop(); } }); dots.appendChild(b); });
-  const setP = p => { userPaused = p; pbtn.setAttribute('aria-pressed', p); pbtn.setAttribute('aria-label', p ? (T.playDemo || 'Continuar demonstração') : (T.pauseDemo || 'Pausar demonstração')); pbtn.innerHTML = p ? ICON_PLAY : ICON_PAUSE; if (p) { vids.forEach(v => v.pause()); if (sound) voxStop(); } };
+  const setP = p => { userPaused = p; pbtn.setAttribute('aria-pressed', p); pbtn.setAttribute('aria-label', p ? (T.playDemo || 'Continuar demonstração') : (T.pauseDemo || 'Pausar demonstração')); pbtn.innerHTML = p ? ICON_PLAY : ICON_PAUSE; if (p && sound) voxStop(); };
   if (sbtn) {
     const setS = on => { sound = on; sbtn.setAttribute('aria-pressed', on); };
     sbtn.addEventListener('click', () => {
@@ -565,7 +557,7 @@ if (call && DIALOGS.length) (() => {
     requestAnimationFrame(draw);
   }
   // começa depois do carregamento para não competir com o LCP
-  const start = () => { if (useVid) { prep(vids[0], 'speak1'); prep(vids[1], 'nod'); } loop(); };
+  const start = () => { loop(); };
   if (reduced()) loop(); else if (d.readyState === 'complete') setTimeout(start, 400); else addEventListener('load', () => setTimeout(start, 400), { once: true });
   d.addEventListener('visibilitychange', () => { if (d.hidden) { vids.forEach(v => v.pause()); voxStop(); } });
   RM.addEventListener?.('change', () => location.reload());
