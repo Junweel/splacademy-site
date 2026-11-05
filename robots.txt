@@ -1,3 +1,4 @@
-# PRÉVIA: não indexar. Trocar ao publicar no domínio oficial (python3 build.py --prod).
 User-agent: *
-Disallow: /
+Allow: /
+
+Sitemap: https://splacademy.com.br/sitemap.xml
