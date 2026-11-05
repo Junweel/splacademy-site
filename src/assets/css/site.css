@@ -727,3 +727,21 @@ tr:last-child td,tr:last-child th{border-bottom:0}
 @media (max-width:600px){.constel.is-live{height:520px}.constel.is-live .constel__core{width:104px;height:104px}.constel__core b{font-size:2.2rem}.constel.is-live .constel__nodes li{font-size:.62rem;padding:5px 8px}}
 @media (max-width:600px){.cast figcaption{white-space:nowrap;font-size:.56rem;letter-spacing:.06em}}
 .legal{max-width:760px}.legal h2{font-size:clamp(1.3rem,2.4vw,1.7rem);margin:2em 0 .6em}.legal h2:first-child{margin-top:0}.legal ul{padding-left:1.2em}.legal li{margin:.45em 0}.legal p,.legal li{line-height:1.65}
+
+/* voz dos personagens */
+.voice-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;border:1.5px solid var(--linha);background:var(--branco);color:var(--noite);font:inherit;font-weight:600;font-size:.9rem;cursor:pointer;margin-top:10px;transition:background .2s,border-color .2s}
+.voice-btn svg{width:20px;height:20px;flex:none}
+.voice-btn:hover{border-color:var(--noite)}
+.voice-btn[aria-pressed="true"]{background:var(--amarelo);border-color:var(--amarelo);color:#0B1119}
+.voice-btn[aria-pressed="true"] svg path+path{animation:vb 1s ease-in-out infinite}
+@keyframes vb{50%{opacity:.25}}
+.voice-btn:focus-visible{outline:3px solid var(--amarelo);outline-offset:2px}
+.tile--media .voice-btn{position:relative;z-index:1;margin:0 0 12px;background:rgba(255,255,255,.95)}
+.voice-btn--call{margin-top:0}
+@media (prefers-reduced-motion:reduce){.voice-btn[aria-pressed="true"] svg path+path{animation:none}}
+.who-card .voice-btn{margin:0 0 12px 8px;vertical-align:middle}
+.fx-toggle{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin:12px 0 0;padding:8px 16px;border-radius:999px;border:1px solid currentColor;background:transparent;color:inherit;font:inherit;font-size:.9rem;cursor:pointer;opacity:.85}
+.fx-toggle svg{width:18px;height:18px}
+.fx-toggle[aria-pressed=false] svg path:last-child{opacity:.2}
+.fx-toggle:hover,.fx-toggle:focus-visible{opacity:1}
+.scene-list .voice-btn{margin-top:2px}

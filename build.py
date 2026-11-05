@@ -183,7 +183,7 @@ def main():
     if OUT.exists(): shutil.rmtree(OUT)
     OUT.mkdir()
     # assets
-    for sub in ['fonts', 'img', 'js', 'vendor', 'media']:
+    for sub in ['fonts', 'img', 'js', 'vendor', 'media', 'audio']:
         shutil.copytree(SRC / 'assets' / sub, OUT / 'assets' / sub)
     (OUT / 'assets/css').mkdir(parents=True)
     (OUT / 'assets/css/site.css').write_text(minify_css((SRC / 'assets/css/site.css').read_text(encoding='utf-8')), encoding='utf-8')

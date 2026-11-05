@@ -417,6 +417,37 @@ $$('[data-field]').forEach(cv => {
   requestAnimationFrame(loop);
 });
 
+/* ---------- voz dos personagens: só toca após clique, um som por vez ---------- */
+
+const asrc = n => BASE + 'assets/audio/' + n + '.mp3';
+const VOX = { a: null, btn: null, onStop: null };
+function voxStop() {
+  if (VOX.a) { VOX.a.pause(); VOX.a.onended = VOX.a.onerror = null; VOX.a = null; }
+  if (VOX.btn) VOX.btn.setAttribute('aria-pressed', 'false');
+  const f = VOX.onStop; VOX.btn = VOX.onStop = null; if (f) f();
+}
+// toca um arquivo; resolve quando termina (ou é interrompido)
+function voxPlay(name, btn, onStop) {
+  voxStop();
+  return new Promise(res => {
+    const a = new Audio(asrc(name)); a.preload = 'auto';
+    VOX.a = a; VOX.btn = btn || null; VOX.onStop = () => { onStop && onStop(); res(false); };
+    if (btn) btn.setAttribute('aria-pressed', 'true');
+    a.onended = () => { if (VOX.a === a) { VOX.a = null; if (VOX.btn) VOX.btn.setAttribute('aria-pressed', 'false'); const f = VOX.onStop; VOX.btn = VOX.onStop = null; onStop && onStop(); } res(true); };
+    a.onerror = () => { if (VOX.a === a) voxStop(); res(false); };
+    a.play().catch(() => { if (VOX.a === a) voxStop(); res(false); });
+  });
+}
+$$('[data-voice]').forEach(b => b.addEventListener('click', e => {
+  e.stopPropagation();
+  if (b.getAttribute('aria-pressed') === 'true') { voxStop(); return; }
+  const host = b.closest('.who-card,.tile'); const v = host && $('video', host);
+  if (v && canVideo()) { loadVid(v); v.play().then(() => v.classList.add('is-on')).catch(() => {}); }
+  voxPlay(b.dataset.voice, b, () => { if (v && v.hasAttribute('data-hover-video')) { v.pause(); v.classList.remove('is-on'); } });
+}));
+// clique no botão não deve arrastar o carrossel
+$$('[data-voice]').forEach(b => b.addEventListener('pointerdown', e => e.stopPropagation()));
+
 /* ---------- tela de chamada da Sophia (vídeo + legenda ao vivo) ---------- */
 const call = $('[data-call]');
 const DIALOGS = window.SPLA_DIALOGS || [];
@@ -425,6 +456,8 @@ if (call && DIALOGS.length) (() => {
   const dots = $('[data-call-dots]', call), pbtn = $('[data-call-pause]', call), clock = $('[data-call-time]', call);
   const wave = $('[data-call-wave]', call), wctx = wave?.getContext('2d');
   const useVid = canVideo() && vids.length === 2;
+  const sbtn = $('[data-call-sound]', call); let sound = false;
+  const say = (name, my) => { if (sound && my === run) voxPlay(name, null, null); };
   if (!useVid) vids.forEach(v => v.remove());
   let i = 0, run = 0, userPaused = reduced(), offscreen = false, cur = 0, secs = 0;
   const paused = () => userPaused || offscreen || d.hidden;
@@ -486,9 +519,9 @@ if (call && DIALOGS.length) (() => {
   function mark() { $$('button', dots).forEach((b, n) => b.setAttribute('aria-pressed', n === i)); tag.textContent = DIALOGS[i].tag; }
   async function scene(my) {
     const s = DIALOGS[i]; mark();
-    await clip('speak1', 'nod', my, async () => { await sleep(350, my); const p = push('', who('Sophia') + words(s.sophia)); await reveal(p, 3600, my, 'sophia'); });
+    await clip('speak1', 'nod', my, async () => { await sleep(350, my); say('hero-q' + i, my); const p = push('', who('Sophia') + words(s.sophia)); await reveal(p, 3600, my, 'sophia'); });
     await clip('nod', 'happy', my, async () => { await sleep(250, my); const p = push('sub--you', who(T.you || 'Você') + youHTML(s)); await reveal(p, 3300, my, 'you'); });
-    await clip('happy', 'speak1', my, async () => { await sleep(200, my); const p = push('', who('Sophia') + words(s.reply)); await reveal(p, 2600, my, 'sophia'); await sleep(250, my); push('sub--tip', `<b>${T.tipLabel || 'Dica da Sophia'}:</b> ${s.tip}`); });
+    await clip('happy', 'speak1', my, async () => { await sleep(200, my); say('hero-r' + i, my); const p = push('', who('Sophia') + words(s.reply)); await reveal(p, 2600, my, 'sophia'); await sleep(250, my); push('sub--tip', `<b>${T.tipLabel || 'Dica da Sophia'}:</b> ${s.tip}`); });
   }
   async function loop() {
     const my = ++run; VOICE.target = 0;
@@ -497,7 +530,18 @@ if (call && DIALOGS.length) (() => {
     try { for (;;) { await scene(my); i = (i + 1) % DIALOGS.length; } } catch (e) { if (e !== 0) console.warn(e); }
   }
   DIALOGS.forEach((s, n) => { const b = d.createElement('button'); b.type = 'button'; b.textContent = s.tag; b.setAttribute('aria-pressed', n === 0); b.setAttribute('aria-label', (T.scene || 'Cena') + ': ' + s.tag); b.addEventListener('click', () => { i = n; if (reduced()) { staticScene(DIALOGS[i]); mark(); } else { if (userPaused) setP(false); loop(); } }); dots.appendChild(b); });
-  const setP = p => { userPaused = p; pbtn.setAttribute('aria-pressed', p); pbtn.setAttribute('aria-label', p ? (T.playDemo || 'Continuar demonstração') : (T.pauseDemo || 'Pausar demonstração')); pbtn.innerHTML = p ? ICON_PLAY : ICON_PAUSE; if (p) vids.forEach(v => v.pause()); };
+  const setP = p => { userPaused = p; pbtn.setAttribute('aria-pressed', p); pbtn.setAttribute('aria-label', p ? (T.playDemo || 'Continuar demonstração') : (T.pauseDemo || 'Pausar demonstração')); pbtn.innerHTML = p ? ICON_PLAY : ICON_PAUSE; if (p) { vids.forEach(v => v.pause()); if (sound) voxStop(); } };
+  if (sbtn) {
+    const setS = on => { sound = on; sbtn.setAttribute('aria-pressed', on); };
+    sbtn.addEventListener('click', () => {
+      if (sound) { setS(false); voxStop(); return; }
+      voxStop(); setS(true);
+      if (reduced()) { (async () => { if (await voxPlay('hero-q' + i, null, null) && sound) await voxPlay('hero-r' + i, null, null); setS(false); })(); return; }
+      if (userPaused) setP(false);
+      loop();
+    });
+    $$('[data-voice]').forEach(b => b.addEventListener('click', () => setS(false)));
+  }
   pbtn.addEventListener('click', () => { const wasStatic = reduced(); setP(!userPaused); if (wasStatic && !userPaused) { /* sem animação: só alterna a cena */ i = (i + 1) % DIALOGS.length; staticScene(DIALOGS[i]); mark(); } });
   if (pbtn) setP(userPaused);
   onView(call, v => (offscreen = !v));
@@ -523,7 +567,7 @@ if (call && DIALOGS.length) (() => {
   // começa depois do carregamento para não competir com o LCP
   const start = () => { if (useVid) { prep(vids[0], 'speak1'); prep(vids[1], 'nod'); } loop(); };
   if (reduced()) loop(); else if (d.readyState === 'complete') setTimeout(start, 400); else addEventListener('load', () => setTimeout(start, 400), { once: true });
-  d.addEventListener('visibilitychange', () => { if (d.hidden) vids.forEach(v => v.pause()); });
+  d.addEventListener('visibilitychange', () => { if (d.hidden) { vids.forEach(v => v.pause()); voxStop(); } });
   RM.addEventListener?.('change', () => location.reload());
 })();
 
@@ -756,4 +800,51 @@ else {
   if (d.readyState === 'complete') idle(go); else addEventListener('load', () => idle(go), { once: true });
 }
 onScroll();
+
+/* ---------- sons sutis da rede neural (Web Audio, sem arquivos) ---------- */
+(() => {
+  const nets = $$('[data-constel],[data-orq]'); if (!nets.length || !(window.AudioContext || window.webkitAudioContext)) return;
+  const EN = (root.lang || '').startsWith('en'), KEY = 'spla-fx';
+  let saved = null; try { saved = localStorage.getItem(KEY); } catch (e) {}
+  let on = saved ? saved === '1' : !reduced(), ac = null, out = null, unlocked = false, lastT = 0, lastN = -1;
+  const SC = [220, 261.63, 293.66, 329.63, 392, 440, 523.25, 587.33, 659.25]; // pentatônica, suave
+  const init = () => {
+    if (ac) return; ac = new (window.AudioContext || window.webkitAudioContext)();
+    out = ac.createGain(); out.gain.value = .5;
+    const dl = ac.createDelay(1), fb = ac.createGain(), lp = ac.createBiquadFilter(), wet = ac.createGain();
+    dl.delayTime.value = .27; fb.gain.value = .38; lp.type = 'lowpass'; lp.frequency.value = 1800; wet.gain.value = .35;
+    out.connect(ac.destination); out.connect(dl); dl.connect(lp); lp.connect(fb); fb.connect(dl); lp.connect(wet); wet.connect(ac.destination);
+  };
+  const unlock = () => { unlocked = true; if (on) { init(); ac.state === 'suspended' && ac.resume(); } };
+  ['pointerdown', 'keydown', 'touchstart'].forEach(t => addEventListener(t, unlock, { once: true, passive: true, capture: true }));
+  function tone(n, pan) {
+    if (!on || !unlocked || d.hidden) return; init(); if (ac.state !== 'running') { ac.resume(); }
+    const now = ac.currentTime, t = performance.now();
+    if (t - lastT < 110 || (n === lastN && t - lastT < 400)) return; lastT = t; lastN = n;
+    const f = SC[((n % SC.length) + SC.length) % SC.length];
+    const g = ac.createGain(), p = ac.createStereoPanner ? ac.createStereoPanner() : null, lp = ac.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.setValueAtTime(2400, now); lp.frequency.exponentialRampToValueAtTime(500, now + 1.2);
+    g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(.05, now + .03); g.gain.exponentialRampToValueAtTime(.0008, now + 1.4);
+    [[f, 'sine', 1], [f * 2.005, 'sine', .25], [f * .5, 'triangle', .35]].forEach(([fr, ty, a]) => {
+      const o = ac.createOscillator(), og = ac.createGain(); o.type = ty; o.frequency.setValueAtTime(fr * 1.01, now); o.frequency.exponentialRampToValueAtTime(fr, now + .25);
+      og.gain.value = a; o.connect(og); og.connect(lp); o.start(now); o.stop(now + 1.5);
+    });
+    lp.connect(g); if (p) { p.pan.value = Math.max(-.8, Math.min(.8, pan || 0)); g.connect(p); p.connect(out); } else g.connect(out);
+  }
+  const btns = [];
+  const paint = () => btns.forEach(b => { b.setAttribute('aria-pressed', on ? 'true' : 'false'); $('span', b).textContent = EN ? (on ? 'Network sounds: on' : 'Network sounds: off') : (on ? 'Sons da rede: ligados' : 'Sons da rede: desligados'); });
+  nets.forEach(box => {
+    const b = d.createElement('button'); b.type = 'button'; b.className = 'fx-toggle';
+    b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 9a4 4 0 010 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span></span>';
+    b.addEventListener('click', () => { on = !on; try { localStorage.setItem(KEY, on ? '1' : '0'); } catch (e) {} paint(); if (on) { unlocked = true; init(); ac.resume(); tone(4, 0); } });
+    (box.closest('.gente__grid') || box).insertAdjacentElement('afterend', b); btns.push(b);
+    const fire = (e, el) => { const r = box.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height; const n = el ? $$('li', box).indexOf(el) : Math.round(y * 8 + x * 3); tone(n, x * 2 - 1); };
+    box.addEventListener('pointerover', e => { const li = e.target.closest && e.target.closest('li'); if (li && box.contains(li)) fire(e, li); });
+    box.addEventListener('pointermove', e => { if (!e.target.closest || !e.target.closest('li')) fire(e, null); }, { passive: true });
+    box.addEventListener('pointerdown', e => { unlock(); lastT = 0; fire(e, e.target.closest && e.target.closest('li')); }, { passive: true });
+    box.addEventListener('focusin', e => { const li = e.target.closest('li'); if (li) tone($$('li', box).indexOf(li), 0); });
+  });
+  paint();
+  matchMedia('(prefers-reduced-motion: reduce)').addEventListener?.('change', m => { if (m.matches && saved === null) { on = false; paint(); } });
+})();
 })();
