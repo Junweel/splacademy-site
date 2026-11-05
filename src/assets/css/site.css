@@ -626,7 +626,6 @@ tr:last-child td,tr:last-child th{border-bottom:0}
   .js .reveal,.js .kinetic:not(.is-in) .kw>span{opacity:1;transform:none}
   .js .kinetic .mark{--mk:100%}
   .marquee__track{animation:none;flex-wrap:wrap;width:auto}
-  .call__vid{display:none}
   .fill .ch{color:var(--papel)}
   .js .squad-ui:not(.is-in) .squad-ui__row div i{transform:scaleX(var(--w))}
   @view-transition{navigation:none}
@@ -736,10 +735,13 @@ tr:last-child td,tr:last-child th{border-bottom:0}
 .voice-btn[aria-pressed="true"] svg path+path{animation:vb 1s ease-in-out infinite}
 @keyframes vb{50%{opacity:.25}}
 .voice-btn:focus-visible{outline:3px solid var(--amarelo);outline-offset:2px}
-.tile--media .voice-btn{position:relative;z-index:1;margin:0 0 12px;background:rgba(255,255,255,.95)}
+.voice-btn--icon{width:44px;height:44px;min-height:0;padding:0;margin:0;justify-content:center;background:rgba(255,255,255,.94);border-color:transparent;box-shadow:0 4px 14px rgba(11,17,25,.25)}
+.tile--media .voice-btn--icon{position:absolute;z-index:2;top:16px;right:16px}
+.who-card__media>.voice-btn--icon{position:absolute;inset:auto 12px 12px auto;width:44px;height:44px;z-index:2;transform:none!important}
+video.lip{opacity:0;transition:opacity .2s}video.lip.is-on{opacity:1}
 .voice-btn--call{margin-top:0}
 @media (prefers-reduced-motion:reduce){.voice-btn[aria-pressed="true"] svg path+path{animation:none}}
-.who-card .voice-btn{margin:0 0 12px 8px;vertical-align:middle}
+
 .fx-toggle{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin:12px 0 0;padding:8px 16px;border-radius:999px;border:1px solid currentColor;background:transparent;color:inherit;font:inherit;font-size:.9rem;cursor:pointer;opacity:.85}
 .fx-toggle svg{width:18px;height:18px}
 .fx-toggle[aria-pressed=false] svg path:last-child{opacity:.2}
