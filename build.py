@@ -208,7 +208,7 @@ def main():
                 # 404 é servido em qualquer profundidade: caminhos absolutos do projeto
                 root = '/' if PROD else PREVIEW_BASE
                 body = body.replace('{{root}}', root)
-            html_out = layout(t, meta, body, slug, None, rel or '404.html', root if slug != '404' else root)
+            html_out = layout(t, meta, body, slug, None, ('404.html' if rel is None else rel), root if slug != '404' else root)
             dest = OUT / (rel or '') / ('index.html' if rel is not None else '404.html')
             dest.parent.mkdir(parents=True, exist_ok=True)
             dest.write_text(html_out, encoding='utf-8')
