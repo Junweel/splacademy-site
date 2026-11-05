@@ -348,7 +348,7 @@ const AGENT = [
   ['p', '$ spla-agent montar-sessao --hoje'],
   ['dim', '› perfil      analista SAP FI · time global'],
   ['dim', '› objetivo    falar na daily sem travar'],
-  ['dim', '› nível       B1 (referência CEFR)'],
+  ['dim', '› nível       intermediário'],
   ['ok', '✓ revisão     on track · follow up · blocker'],
   ['ok', '✓ novo        “flag a risk” · “push back”'],
   ['ok', '✓ gramática   he / she / it + -s'],
