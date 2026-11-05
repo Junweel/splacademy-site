@@ -50,7 +50,7 @@
    "niveis",
    "cefr"
   ],
-  "a": "<p>Serve, sim. A trilha vai do zero ao C1 e segue os níveis do CEFR, a escala internacional usada para descrever o domínio de um idioma.</p><p>Você começa no ponto em que está hoje e sobe um degrau de cada vez.</p>",
+  "a": "<p>Serve, sim. A trilha vai do zero à fluência profissional, em níveis claros.</p><p>Você começa no ponto em que está hoje e sobe um degrau de cada vez.</p>",
   "next": [
    "tempo",
    "certificado",
@@ -185,7 +185,7 @@
    "comprovante",
    "reconhecido"
   ],
-  "a": "<p>Tem. Ao concluir cada nível, você recebe o certificado da SPLA com o seu nível equivalente no CEFR, por exemplo “nível equivalente B2 (CEFR)”.</p><p>Se você precisa de uma prova internacional específica, conta pra gente e montamos o plano juntos.</p>",
+  "a": "<p>Tem. Ao concluir cada nível, você recebe o certificado de conclusão da SPLA, emitido pela própria escola. Ele não é uma certificação oficial nem substitui provas internacionais.</p><p>Se você precisa de uma prova internacional específica, conta pra gente e montamos o plano juntos.</p>",
   "next": [
    "zero",
    "garantia"
