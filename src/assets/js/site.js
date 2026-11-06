@@ -793,6 +793,31 @@ else {
 }
 onScroll();
 
+
+/* Cartão Paulista: lente de revelação com atalho acessível para toque. */
+$$('[data-cpmask]').forEach(area => {
+  const set = (x, y) => { area.style.setProperty('--cpx', x + 'px'); area.style.setProperty('--cpy', y + 'px'); };
+  const move = e => { const r = area.getBoundingClientRect(); set(e.clientX - r.left, e.clientY - r.top); };
+  area.addEventListener('pointermove', move, { passive: true });
+});
+$$('[data-cphint]').forEach(button => {
+  const area = $('[data-cpmask]', button.closest('.cp'));
+  button.addEventListener('click', () => {
+    const open = area.classList.toggle('is-open'); button.setAttribute('aria-pressed', open);
+    button.textContent = open ? 'Ocultar os recursos' : 'Mostrar os recursos do Cartão Paulista';
+    button.setAttribute('aria-controls', 'cartao-paulista');
+  });
+});
+/* Botões acessíveis navegam pelo mesmo carrossel nativo e indicam a tela atual. */
+$$('[data-cptabs]').forEach(tabs => {
+  const car = $('.cp-phones', tabs.closest('.cp')), track = $('.car__track', car), slides = [...track.children];
+  $$('[data-cptab]', tabs).forEach(button => button.addEventListener('click', () => {
+    const index = +button.dataset.cptab;
+    $$('[data-cptab]', tabs).forEach(b => b.setAttribute('aria-pressed', b === button ? 'true' : 'false'));
+    track.scrollTo({ left: slides[index].offsetLeft - slides[0].offsetLeft, behavior: reduced() ? 'auto' : 'smooth' });
+  }));
+});
+
 /* ---------- sons sutis da rede neural (Web Audio, sem arquivos) ---------- */
 (() => {
   const nets = $$('[data-constel],[data-orq]'); if (!nets.length || !(window.AudioContext || window.webkitAudioContext)) return;

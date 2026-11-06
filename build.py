@@ -42,6 +42,16 @@ def pic_html(m, root):
     return (f'<picture><source type="image/avif" srcset="{base}-360.avif 360w, {base}-720.avif 720w" sizes="{sizes}">'
             f'<img src="{base}-720.webp" srcset="{base}-360.webp 360w, {base}-720.webp 720w" sizes="{sizes}" width="720" height="960" alt="{html.escape(alt)}" loading="lazy" decoding="async"></picture>')
 
+def phone_html(m, root):
+    """{{phone:tela|alt|legenda}} -> tela de prévia do app otimizada."""
+    name, alt, cap = m.group(1).split('|')
+    base = f'{root}assets/img/v1/cartao-{name}'
+    # Dimensões fixas e fonte AVIF/WebP evitam deslocamento de layout.
+    return (f'<figure class="cp-phone" data-tilt data-tilt-max="4" aria-roledescription="slide"><span class="cp-phone__speaker" aria-hidden="true"></span><div class="cp-phone__screen">'
+            f'<picture><source type="image/avif" srcset="{base}-250.avif 250w, {base}-360.avif 360w, {base}-500.avif 500w" sizes="(min-width:1440px) 250px, (min-width:768px) 260px, 72vw">'
+            f'<img src="{base}-360.webp" srcset="{base}-250.webp 250w, {base}-360.webp 360w, {base}-500.webp 500w" sizes="(min-width:1440px) 250px, (min-width:768px) 260px, 72vw" width="360" height="780" alt="{html.escape(alt)}" loading="lazy" decoding="async"></picture></div>'
+            f'<figcaption>{html.escape(cap)}<small>Prévia do app</small></figcaption></figure>')
+
 def faq_html(faq, root):
     out = ['<div class="faq">']
     for f in faq:
@@ -200,6 +210,8 @@ def main():
             else: rel = t['prefix'] + slug + '/'
             depth = 0 if rel is None else rel.count('/')
             root = '../' * depth
+            body = re.sub(r'\{\{include:([a-z-]+)\}\}', lambda m: (SRC / 'templates' / (m.group(1) + '.html')).read_text(encoding='utf-8'), body)
+            body = re.sub(r'\{\{phone:([^}]*)\}\}', lambda m: phone_html(m, root), body)
             body = re.sub(r'\{\{pic:([^}]*)\}\}', lambda m: pic_html(m, root), body)
             body = body.replace('{{root}}', root).replace('{{wa}}', WA).replace('{{email}}', EMAIL)
             for k, v in ICON.items(): body = body.replace('{{icon:' + k + '}}', v)
