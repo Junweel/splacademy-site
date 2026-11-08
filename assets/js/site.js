@@ -794,7 +794,7 @@ else {
 onScroll();
 
 
-/* Cartão Paulista: lente de revelação com atalho acessível para toque. */
+/* Crachá Paulista: lente de revelação com atalho acessível para toque. */
 $$('[data-cpmask]').forEach(area => {
   const set = (x, y) => { area.style.setProperty('--cpx', x + 'px'); area.style.setProperty('--cpy', y + 'px'); };
   const move = e => { const r = area.getBoundingClientRect(); set(e.clientX - r.left, e.clientY - r.top); };
@@ -804,7 +804,7 @@ $$('[data-cphint]').forEach(button => {
   const area = $('[data-cpmask]', button.closest('.cp'));
   button.addEventListener('click', () => {
     const open = area.classList.toggle('is-open'); button.setAttribute('aria-pressed', open);
-    button.textContent = open ? 'Ocultar os recursos' : 'Mostrar os recursos do Cartão Paulista';
+    button.textContent = open ? 'Ocultar os recursos' : 'Mostrar os recursos do Crachá Paulista';
     button.setAttribute('aria-controls', 'cartao-paulista');
   });
 });
