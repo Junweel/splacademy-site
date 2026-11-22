@@ -237,9 +237,73 @@ $$('[data-lens]').forEach(l => {
   btn?.addEventListener('click', () => { const on = l.classList.toggle('is-all'); btn.setAttribute('aria-pressed', on); btn.textContent = on ? 'Voltar ao português' : 'Ver tudo em inglês'; });
 });
 $$('[data-tile-reveal]').forEach(t => {
-  const hint = $('[data-tile-hint]', t); if (!FINE && hint) hint.textContent = 'Toque e arraste para revelar o piso';
+  const hint = $('[data-tile-hint]', t);
   t.dataset.cursorLabel = 'Piso';
-  maskArea(t, '--tx', '--ty');
+  const art = d.createElement('div');
+  art.className = 'tile-reveal__art';
+  art.setAttribute('aria-hidden', 'true');
+  const canvas = d.createElement('canvas');
+  canvas.className = 'tile-reveal__cover';
+  const hintEl = $('[data-tile-hint]', t);
+  t.insertBefore(art, hintEl);
+  t.insertBefore(canvas, hintEl);
+  const ctx = canvas.getContext('2d');
+  const paintCover = () => {
+    const r = t.getBoundingClientRect();
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    canvas.width = Math.max(1, Math.round(r.width * dpr));
+    canvas.height = Math.max(1, Math.round(r.height * dpr));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#10192A';
+    ctx.fillRect(0, 0, r.width, r.height);
+  };
+  paintCover();
+  if (reduced()) {
+    if (hint) hint.textContent = 'Toque para ver o piso';
+    t.addEventListener('click', () => t.classList.add('is-shown'));
+    return;
+  }
+  if (hint) hint.textContent = FINE ? 'Arraste para revelar o piso' : 'Toque e arraste para revelar o piso';
+  let drawing = false, last = null;
+  const scratch = (x, y) => {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = '#000';
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 64;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.arc(x, y, 32, 0, Math.PI * 2);
+    ctx.fill();
+    if (last) {
+      ctx.beginPath();
+      ctx.moveTo(last.x, last.y);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+    last = { x, y };
+  };
+  const local = e => {
+    const r = t.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  };
+  t.addEventListener('pointerdown', e => {
+    if (e.button != null && e.button !== 0) return;
+    drawing = true;
+    last = null;
+    t.setPointerCapture?.(e.pointerId);
+    const p = local(e);
+    scratch(p.x, p.y);
+  });
+  t.addEventListener('pointermove', e => {
+    if (!drawing) return;
+    const p = local(e);
+    scratch(p.x, p.y);
+  });
+  const stop = () => { drawing = false; last = null; };
+  t.addEventListener('pointerup', stop);
+  t.addEventListener('pointercancel', stop);
 });
 
 /* ---------- vídeos sob demanda ---------- */

@@ -279,9 +279,13 @@ a:hover { text-decoration-color: #F5C518; }
 .pledge .card { background: rgba(255, 255, 255, .04); }
 .spot::after { display: none; }
 
-.tile-reveal { background: #10192A; border-color: rgba(245, 197, 24, .2); }
-.tile-reveal::before { opacity: .18; }
-.tile-reveal span { background: #152033; color: #F3EBDD; border-color: rgba(245, 197, 24, .3); }
+.tile-reveal { background: #10192A; border-color: rgba(245, 197, 24, .2); touch-action: none; }
+.tile-reveal::before,
+.tile-reveal::after { content: none; display: none; opacity: 0; }
+.tile-reveal__art { position: absolute; inset: 0; background: #10192A url("../img/piso-c.svg") 0 0 / 56px 56px; }
+.tile-reveal__cover { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.tile-reveal.is-shown .tile-reveal__cover { opacity: 0; }
+.tile-reveal span { z-index: 2; pointer-events: none; background: #152033; color: #F3EBDD; border-color: rgba(245, 197, 24, .3); }
 
 .car__bar { background: rgba(255, 255, 255, .12); }
 .car__bar i { background: #F5C518; }
