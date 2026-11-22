@@ -32,9 +32,90 @@
 <meta name="twitter:description" content="Escola de idiomas nascida em São Paulo. Você treina o inglês das cenas reais do seu trabalho, conversando por voz com a Sophia, tutora de IA, e sai falando. Do zero à fluência profissional.">
 <meta name="twitter:image" content="https://splacademy.com.br/assets/img/og.png">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": ["EducationalOrganization", "LocalBusiness"], "name": "SPLA · São Paulo Languages Academy", "url": "https://splacademy.com.br/", "logo": "https://splacademy.com.br/assets/img/icon-512.png", "image": "https://splacademy.com.br/assets/img/og.png", "email": "contact@splacademy.com.br", "telephone": "+55 11 98178-3554", "address": {"@type": "PostalAddress", "streetAddress": "Av. Paulista, 1106, Sala 01, Andar 16", "addressLocality": "São Paulo", "addressRegion": "SP", "postalCode": "01310-914", "addressCountry": "BR"}, "parentOrganization": {"@type": "Organization", "name": "SIIN ANALYTICS SISTEMAS INFORMATICOS LTDA", "url": "https://siincompany.com", "taxID": "54.575.722/0001-01"}, "areaServed": "BR", "inLanguage": ["pt-BR", "en"]}</script>
-<link rel="preload" as="image" href="assets/media/cidade-loop-poster.jpg" fetchpriority="high">
+<link rel="preload" as="image" href="assets/media/entrada-16x9-poster.jpg" media="(min-width: 800px)" fetchpriority="high">
+<link rel="preload" as="image" href="assets/media/entrada-9x16-poster.jpg" media="(max-width: 799px)" fetchpriority="high">
 </head>
 <body>
+<div class="entrada" id="entrada">
+  <picture class="entrada__poster">
+    <source media="(min-width: 800px)" srcset="assets/media/entrada-16x9-poster.jpg">
+    <img src="assets/media/entrada-9x16-poster.jpg" alt="" width="480" height="854" fetchpriority="high" decoding="sync">
+  </picture>
+  <video class="entrada__vid entrada__vid--wide" muted playsinline preload="none" poster="assets/media/entrada-16x9-poster.jpg">
+    <source src="assets/media/entrada-16x9.mp4" type="video/mp4">
+    <source src="assets/media/entrada-16x9.webm" type="video/webm">
+  </video>
+  <video class="entrada__vid entrada__vid--tall" muted playsinline preload="none" poster="assets/media/entrada-9x16-poster.jpg">
+    <source src="assets/media/entrada-9x16.mp4" type="video/mp4">
+    <source src="assets/media/entrada-9x16.webm" type="video/webm">
+  </video>
+  <img class="entrada__logo" src="assets/img/brand/logo-horizontal.svg" alt="" width="420" height="130">
+  <button class="entrada__skip" type="button">Pular</button>
+</div>
+<script>
+(function () {
+  var KEY = 'spla-entrada-v4';
+  var box = document.getElementById('entrada');
+  var hero = null;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var seen = false;
+  try { seen = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
+  function mark() { try { sessionStorage.setItem(KEY, '1'); } catch (e) {} }
+  if (!box) return;
+  if (seen) { box.remove(); document.addEventListener('DOMContentLoaded', loop); return; }
+  document.documentElement.classList.add('has-entrada');
+  var closed = false;
+  function close() {
+    if (closed) return;
+    closed = true;
+    mark();
+    box.classList.add('is-out');
+    document.documentElement.classList.remove('has-entrada');
+    loop();
+    setTimeout(function () { box.remove(); }, 720);
+  }
+  function loop() {
+    var start = function () {
+      hero = document.querySelector('.hero__video');
+      if (!hero || reduce) return;
+      var p = hero.play();
+      if (p && p.catch) p.catch(function () {});
+    };
+    if (document.querySelector('.hero__video')) start();
+    else document.addEventListener('DOMContentLoaded', start);
+  }
+  var skip = box.querySelector('.entrada__skip');
+  skip.addEventListener('click', close);
+  var arm = false;
+  setTimeout(function () { arm = true; }, 500);
+  function intent(e) {
+    if (!arm || closed) return;
+    if (e.type === 'keydown' && e.key !== 'Escape' && e.key !== ' ' && e.key !== 'Enter') return;
+    close();
+  }
+  window.addEventListener('wheel', intent, { passive: true });
+  window.addEventListener('touchmove', intent, { passive: true });
+  window.addEventListener('keydown', intent);
+  if (reduce) {
+    box.classList.add('is-still');
+    skip.textContent = 'Entrar';
+    return;
+  }
+  var wide = window.matchMedia('(min-width: 800px)').matches;
+  var vid = box.querySelector(wide ? '.entrada__vid--wide' : '.entrada__vid--tall');
+  var other = box.querySelector(wide ? '.entrada__vid--tall' : '.entrada__vid--wide');
+  if (other) { other.removeAttribute('src'); other.querySelectorAll('source').forEach(function (s) { s.remove(); }); other.load && other.load(); }
+  vid.addEventListener('ended', close);
+  vid.addEventListener('playing', function () { box.classList.add('is-playing'); });
+  function startVid() {
+    var play = vid.play();
+    if (play && play.catch) play.catch(function () { box.classList.add('is-still'); skip.textContent = 'Entrar'; });
+  }
+  var poster = box.querySelector('.entrada__poster img');
+  if (!poster || poster.complete) startVid();
+  else poster.addEventListener('load', startVid);
+})();
+</script>
 <a class="skip" href="#main">Pular para o conteúdo</a>
 <div class="progress" aria-hidden="true"><i></i></div>
 <header class="top">
@@ -50,7 +131,7 @@
 
 <section class="hero hero--city">
 <div class="hero__media" aria-hidden="true">
-    <video class="hero__video" autoplay muted loop playsinline poster="assets/media/cidade-loop-poster.jpg" preload="metadata">
+    <video class="hero__video" muted loop playsinline poster="assets/media/cidade-loop-poster.jpg" preload="none">
       <source src="assets/media/cidade-loop.webm" type="video/webm">
       <source src="assets/media/cidade-loop.mp4" type="video/mp4">
     </video>
@@ -62,9 +143,9 @@
       <p class="eyebrow eyebrow--red">São Paulo Languages Academy</p>
       <h1 class="kinetic" data-kinetic>O inglês do seu trabalho, <span class="hero__em">em outro nível.</span></h1>
       <p class="lead">Você treina o inglês das cenas reais do seu trabalho, como a daily com o time global, a call com o cliente e a entrevista para a vaga que você quer. Conversa por voz com a Sophia, nossa tutora de IA, todo dia, em 20 a 30 minutos. E sai falando.</p>
-      <a class="sci-strip" href="metodologia/#referencias-bonus-paulista">
+      <a class="sci-strip" href="#base-cientifica">
       <span class="sci-strip__ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6L4.5 18.2A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-2.8L14 9V3"/><path d="M7.6 15h8.8"/></svg></span>
-      <span><b>Base científica · 150+ publicações com DOI</b></span>
+      <span><b>Base científica · 150+ publicações com DOI</b><small>48 pesquisadores na banca em formação · mais de 80 métodos</small></span>
       <span class="sci-strip__chev" aria-hidden="true">›</span>
     </a>
     <div class="btns">
@@ -109,6 +190,25 @@
         <button class="iconbtn" type="button" data-call-pause aria-pressed="false" aria-label="Pausar demonstração"></button>
       </div>
     </div>
+  </div>
+</section>
+
+<section class="sec sec--ciencia" id="base-cientifica" aria-labelledby="ciencia-title">
+  <div class="wrap">
+    <div class="sec__head reveal">
+      <p class="eyebrow">Base científica</p>
+      <h2 id="ciencia-title" class="kinetic" data-kinetic>Cada exercício nasce de pesquisa</h2>
+      <p class="lead">Por trás de cada sessão há uma bibliografia pública sobre aprendizagem, linguagem, motivação e desenho de experiências. Os números contam estudos e autores citados. Não são endosso, parceria nem uma banca já constituída.</p>
+    </div>
+    <div class="ciencia__nums">
+      <article class="reveal"><b data-count="48">48</b><span>pesquisadores</span><small>Banca de cientistas em formação</small></article>
+      <article class="reveal"><b data-count="80" data-suffix="+">80+</b><span>métodos analisados</span><small>Mais de 80 métodos</small></article>
+      <article class="reveal"><b data-count="300" data-suffix="+">300+</b><span>autores citados</span><small>Bibliografia, sem endosso</small></article>
+      <article class="reveal"><b data-count="150" data-suffix="+">150+</b><span>publicações com DOI</span><small>Piso conservador do catálogo</small></article>
+      <article class="reveal"><b data-count="18">18</b><span>autorizaram a citação</span><small>Autorização formal, não parceria</small></article>
+    </div>
+    <p class="small muted">A banca científica está em formação. 18 pesquisadores autorizaram formalmente a citação do trabalho deles. Citar um estudo não significa que o autor endosse a SPLA, participe da escola ou tenha parceria com ela.</p>
+    <p><a class="link-arrow" href="metodologia/#referencias-bonus-paulista">Ver a base científica completa</a></p>
   </div>
 </section>
 
